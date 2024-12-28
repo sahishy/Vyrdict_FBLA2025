@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 moveVector;
 
-    void Update()
+    void Update() //test
     {
         PlayerMovement();
     }
