@@ -11,7 +11,9 @@ public class PlayerController : MonoBehaviour
 
     void Update() //test
     {
-        PlayerMovement();
+        if(!DecisionHandler.instance.inDecisionMode) {
+            PlayerMovement();
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context) {

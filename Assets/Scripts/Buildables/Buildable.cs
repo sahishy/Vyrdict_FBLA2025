@@ -5,9 +5,17 @@ using UnityEditor;
 public class Buildable : ScriptableObject
 {
     [SerializeField] private Sprite _icon;
+    [SerializeField] private string _description;
+    [SerializeField] private int _environmentEffect;
+    [SerializeField] private int _communnityEffect;
+    [SerializeField] private int _economyEffect;
     [SerializeField] private GameObject _tile;
 
     public Sprite icon { get => _icon; set => _icon = value; }
+    public string description { get => _description; set => _description = value; }
+    public int environmentEffect { get => _environmentEffect; set => _environmentEffect = value; }
+    public int communityEffect { get => _communnityEffect; set => _communnityEffect = value; }
+    public int economyEffect { get => _economyEffect; set => _economyEffect = value; }
     public GameObject tile { get => _tile; set => _tile = value; }
 }
 
@@ -31,9 +39,23 @@ public class ItemEditor : Editor
         GUILayout.Label(script.name, new GUIStyle(EditorStyles.label) { fontSize = 24, fontStyle = FontStyle.Bold } );
         GUILayout.EndHorizontal();
 
-        // GAMEPLAY SECTION
+        // DESCRIPTION SECTION
         DrawHorizontalRule();
-        DrawHeader("Gameplay");
+        DrawHeader("Description");
+
+        script.description = EditorGUILayout.TextArea(script.description, GUILayout.Height(64));
+
+        // EFFECTS SECTION
+        DrawHorizontalRule();
+        DrawHeader("Effects");
+
+        script.environmentEffect = (int)EditorGUILayout.Slider("Environment", script.environmentEffect, -3, 3);
+        script.communityEffect = (int)EditorGUILayout.Slider("Community", script.communityEffect, -3, 3);
+        script.economyEffect = (int)EditorGUILayout.Slider("Economy", script.economyEffect, -3, 3);
+
+        // REFERENCES SECTION
+        DrawHorizontalRule();
+        DrawHeader("References");
 
         script.tile = EditorGUILayout.ObjectField("Tile", script.tile, typeof(GameObject), false) as GameObject;
 

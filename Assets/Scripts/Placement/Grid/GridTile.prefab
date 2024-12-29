@@ -77,7 +77,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a65206cd91cf989459108a0643e6fcae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentBuildable: {fileID: 0}
   holder: {fileID: 7976693751602039099}
+  display: {fileID: 0}
   tileModels:
   - {fileID: 8806954344427740751, guid: e0600489b60643342b13fec7dcb72413, type: 3}
 --- !u!64 &4862028402546345344

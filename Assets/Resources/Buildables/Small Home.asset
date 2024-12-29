@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a2886208cc821a49803b041987ee2f2, type: 3}
   m_Name: Small Home
   m_EditorClassIdentifier: 
-  _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  _icon: {fileID: 21300000, guid: 75fb4a51f95f547e59ba2d25777cdbc7, type: 3}
+  _description: A tiny little home where a few people can live.
+  _environmentEffect: -1
+  _communnityEffect: 1
+  _economyEffect: 0
   _tile: {fileID: 7379618341076902164, guid: 9baa63e094e5365408a6af39a75da40d, type: 3}

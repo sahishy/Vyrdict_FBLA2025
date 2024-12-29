@@ -1,12 +1,18 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    public static PlayerInteraction instance;
+
     Interactable focusedInteractable = null;
     public Material highlightMaterial;
 
+    void Awake() {
+        instance = this;
+    }
 
     void Update()
     {
@@ -18,7 +24,7 @@ public class PlayerInteraction : MonoBehaviour
         //INTERACTABLE DETECTION
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity)) {
+        if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity) && !EventSystem.current.IsPointerOverGameObject()) {
 
             Interactable hitInteractable = hit.collider.gameObject.GetComponent<Interactable>();
             if(hitInteractable != null) {
@@ -47,15 +53,30 @@ public class PlayerInteraction : MonoBehaviour
     private void UpdateFocusedInteractable(Interactable interactable) {
         if(interactable != focusedInteractable) {
 
+            //HIGHLIGHT THE INTERACTABLE
             HighlightFocusedInteractable(focusedInteractable?.GetGameObject(), interactable?.GetGameObject());
+            
             focusedInteractable = interactable;
+
+            //PLACEMENT GHOST
+            if(PlacementHandler.instance.currentGhost != null) {
+                PlacementHandler.instance.UpdateGhost(GetFocusedGridTile());
+            }
 
         } else {
             return;
         }
     }
+
+    public Interactable GetFocusedInteractable() {
+        return focusedInteractable;
+    }
+    public GridTile GetFocusedGridTile() {
+        return focusedInteractable?.GetGameObject().GetComponent<GridTile>();
+    }
+
     private Dictionary<GameObject, Material[]> originalMaterials = new Dictionary<GameObject, Material[]>();
-    private void HighlightFocusedInteractable(GameObject previousInteractable, GameObject newInteractable) {
+    public void HighlightFocusedInteractable(GameObject previousInteractable, GameObject newInteractable) {
 
         //----------SCALE----------
 
@@ -67,6 +88,8 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         //----------MATERIAL----------
+
+        //gets previous focused interactable and restores original materials
         if (previousInteractable != null) {
             Transform previousHolder = previousInteractable.transform.Find("holder");
             if (previousHolder != null) {
@@ -80,6 +103,9 @@ public class PlayerInteraction : MonoBehaviour
                 }
             }
         }
+        
+        //gets new focused interactable and adds highlight material, 
+        //stores original materials if not already stored
         if (newInteractable != null) {
             Transform newHolder = newInteractable.transform.Find("holder");
             if (newHolder != null) {
