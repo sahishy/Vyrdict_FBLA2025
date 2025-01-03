@@ -15,6 +15,6 @@ MonoBehaviour:
   _icon: {fileID: 21300000, guid: 491660c365d7c448db1cb9fb7f4dd84c, type: 3}
   _description: A large and spacious home where big families can live.
   _environmentEffect: -2
-  _communnityEffect: 2
+  _happinessEffect: 3
   _economyEffect: 0
-  _tile: {fileID: 0}
+  _tile: {fileID: 6082287250297484355, guid: 09e7857430abf444da3083166a93b484, type: 3}

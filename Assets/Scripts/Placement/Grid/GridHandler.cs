@@ -1,10 +1,13 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class GridHandler : MonoBehaviour
 {
-    List<GameObject> gridCells = new List<GameObject>();
+    public static GridHandler instance;
+
+    private Dictionary<Vector2, GridTile> gridCells = new Dictionary<Vector2, GridTile>();
     public float cellSize = 1;
 
     [Header("Generation")]
@@ -17,18 +20,26 @@ public class GridHandler : MonoBehaviour
     public GameObject gridCellPrefab;
     public List<Buildable> natureBuildables = new List<Buildable>();
 
+    void Awake() {
+        instance = this;
+    }
+
     void Start()
     {
-        Invoke(nameof(CreateGrid), 0);
+        Invoke(nameof(CreateGrid), 1);
     }
 
     void CreateGrid() {
 
+        //CREATING TILES
+
         for(int i = 0; i < size.x; i++) {
 
             for(int j = 0; j < size.y; j++) {
-
-                Vector3 pos = GetHexPos(i, j);
+                
+                //GET CELL POS
+                Vector2 gridPos = new Vector2(i, j);
+                Vector3 pos = GetHexPos((int)gridPos.x, (int)gridPos.y);
 
                 float seed = Random.Range(0, 1000000);
                 float waterValue = Mathf.PerlinNoise((pos.x + seed) / noiseFrequency, (pos.z + seed) / noiseFrequency);
@@ -36,41 +47,124 @@ public class GridHandler : MonoBehaviour
                 float combinedValue = waterValue * falloffValue;
 
                 if(combinedValue < waterThreshold) {
+                    //STORE CELL AS EMPTY TILE / WATER TILE IN DICTIONARY
+                    gridCells.Add(gridPos, null);
+
                     continue;
                 }
 
-                GridTile cell = CreateGridCell(pos);
+                //CREATE CELL
+                GridTile gridTile = CreateGridCell(pos, gridPos);
+                //STORE CELL IN DICTIONARY
+                gridCells.Add(gridPos, gridTile);
 
+                //CHECK IF CELL HAS NATURE ELEMENTS ON IT
                 float natureValue = Mathf.PerlinNoise((pos.x + seed * 2) / noiseFrequency, (pos.z + seed * 2) / noiseFrequency);
 
+                //ADD NATURE ELEMENTS IF IT DOES
                 if(natureValue < natureThreshold) {
-                    cell.Initialize(natureBuildables[Random.Range(0, natureBuildables.Count)]);
+
+                    Buildable randomNatureBuildable = natureBuildables[Random.Range(0, natureBuildables.Count)];
+
+                    gridTile.Initialize(randomNatureBuildable);
+
+                    //STORE BUILDABLE IN PLACED BUILDABLES
+                    PlacementHandler.instance.allPlacedBuildables.Add(randomNatureBuildable);
+                    //Update stats
+                    StatsHandler.instance.UpdateStats(randomNatureBuildable);
+
                     continue;
                 }
-                cell.Initialize();
+                //INITIALIZE GRID TILE IF NOT INITIALIZED ALREADY
+                gridTile.Initialize();
 
             }
 
         }
 
-        Debug.Log("Done");
+        //ASSIGNING NEIGHBORS
+        foreach(var cell in gridCells) {
+            Vector2 cellPos = cell.Key;
+            GridTile cellTile = cell.Value;
+            
+            if(cellTile != null) {
+                cellTile.neighbors = GetHexNeighbors(cellPos);
+            }
+        }
 
     }
 
-    private GridTile CreateGridCell(Vector3 pos) {
+    private GridTile CreateGridCell(Vector3 pos, Vector2 gridPos) {
         float animationTime = 0.5f;
         float animationTimeOffset = Random.Range(0, 0.2f);
 
         GameObject cell = Instantiate(gridCellPrefab, gridCellHolder);
         cell.transform.localScale = Vector3.zero;
         cell.transform.position = pos;
+        cell.name = $"GridCell ({gridPos.x}, {gridPos.y})";
 
         cell.transform.DOScale(Vector3.one, animationTime + animationTimeOffset).SetEase(Ease.OutBounce);
 
-        gridCells.Add(cell);
-        cell.name = $"Grid Cell {gridCells.IndexOf(cell)}";
-
         return cell.GetComponent<GridTile>();
+    }
+
+    private List<GridTile> GetHexNeighbors(Vector2 pos) {
+        // Dictionary<Direction, GridTile> neighbors = new Dictionary<Direction, GridTile>() {
+        //     {Direction.TopLeft, null},
+        //     {Direction.TopRight, null},
+        //     {Direction.Left, null},
+        //     {Direction.Right, null},
+        //     {Direction.BottomLeft, null},
+        //     {Direction.BottomRight, null},
+        // };
+        List<GridTile> neighbors = new List<GridTile>();
+
+        bool even = pos.y % 2 == 0;
+
+        List<Vector2> evenDirections = new List<Vector2>() {
+            new Vector2(-1, 1), // Top left
+            new Vector2(0, 1),  // Top right
+            new Vector2(-1, 0), // Left
+            new Vector2(1, 0),  // Right
+            new Vector2(-1, -1),// Bottom left
+            new Vector2(0, -1)  // Bottom right
+        };
+        List<Vector2> oddDirections = new List<Vector2>() {
+            new Vector2(0, 1),  // Top left
+            new Vector2(1, 1),  // Top right
+            new Vector2(-1, 0), // Left
+            new Vector2(1, 0),  // Right
+            new Vector2(0, -1), // Bottom left
+            new Vector2(1, -1)  // Bottom right
+        };
+        List<Vector2> directions = even ? evenDirections : oddDirections;
+        Dictionary<Direction, Vector2> directionsDictionary = new Dictionary<Direction, Vector2>() {
+            {Direction.TopLeft, directions[0]},
+            {Direction.TopRight, directions[1]},
+            {Direction.Left, directions[2]},
+            {Direction.Right, directions[3]},
+            {Direction.BottomLeft, directions[4]},
+            {Direction.BottomRight, directions[5]}
+        };
+
+        foreach(Direction direction in directionsDictionary.Keys)
+        {
+            //COORDINATE OF NEIGHBOR CELL
+            Vector2 neighborCoord = pos + directionsDictionary[direction];
+            //CHECK IF NEIGHBOR TILE EXISTS
+            if(gridCells.TryGetValue(neighborCoord, out GridTile neighborTile)) {
+                //CHECK IF NEIGHBOR TILE IS LAND (NOT WATER)
+
+                neighbors.Add(neighborTile);
+                //---STORING DIRECTIONS---
+                // if(neighborTile != null) {
+                //     neighbors[direction] = neighborTile;
+                // }
+
+            }
+        }
+
+        return neighbors;
     }
     
     private Vector3 GetHexPos(int x, int y) {
@@ -91,5 +185,13 @@ public class GridHandler : MonoBehaviour
 
         return falloff;
     }
+}
 
+public enum Direction {
+    TopLeft,
+    TopRight,
+    Left,
+    Right,
+    BottomLeft,
+    BottomRight
 }

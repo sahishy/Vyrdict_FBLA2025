@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 26f35e605e5ed4540af84429071707d4, type: 3}
   _description: A big mill that focuses on chopping down trees for trade.
-  _environmentEffect: -3
-  _communnityEffect: -1
-  _economyEffect: 2
-  _tile: {fileID: 0}
+  _environmentEffect: -2
+  _happinessEffect: 0
+  _economyEffect: 3
+  _tile: {fileID: 4222117795289243240, guid: ea63385b72bb146ffb971a488ae8f560, type: 3}

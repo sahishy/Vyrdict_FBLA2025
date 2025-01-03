@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InventoryItem : MonoBehaviour
+public class InventoryItem : MonoBehaviour, Animatable
 {
     public Buildable buildable;
     
@@ -22,6 +22,7 @@ public class InventoryItem : MonoBehaviour
 
     public void UpdateAmount(int amount) {
         itemAmount.text = amount.ToString();
+        itemAmount.transform.parent.gameObject.SetActive(amount > 0);
     }
 
     public void ButtonClick() {
@@ -31,11 +32,17 @@ public class InventoryItem : MonoBehaviour
     }
 
     public void ButtonEnter() {
-        transform.DOScale(Vector3.one * 1.2f, 0.2f);
-    }
+        GameHandler.instance.currentFocusedAnimatable = this;
 
+        transform.DOScale(1.2f, 0.2f);
+        itemName.transform.parent.DOScale(0.8f, 0.2f);
+    }
     public void ButtonExit() {
-        transform.DOScale(Vector3.one, 0.2f);
+        transform.DOScale(1f, 0.2f);
+        itemName.transform.parent.DOScale(0f, 0.2f);
+    }
+    public void AnimatableExit() {
+        ButtonExit();
     }
 
 }

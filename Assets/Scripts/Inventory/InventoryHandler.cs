@@ -7,7 +7,7 @@ public class InventoryHandler : MonoBehaviour
     private Dictionary<Buildable, ItemData> inventory = new Dictionary<Buildable, ItemData>();
 
     [Header("References")]
-    public Buildable testItem;
+    public List<Buildable> testItems;
     public GameObject inventoryItemPrefab;
     public Transform inventoryItemHolder;
 
@@ -16,9 +16,11 @@ public class InventoryHandler : MonoBehaviour
     }
 
     void Start() {
-        AddItem(testItem, 10);
+        foreach(Buildable item in testItems) {
+            AddItem(item, 10);
+        }
     }
-
+    
     public void AddItem(Buildable buildable, int _amount = 1) {
 
         if(inventory.ContainsKey(buildable)) {

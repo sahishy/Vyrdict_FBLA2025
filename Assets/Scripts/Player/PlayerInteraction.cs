@@ -78,6 +78,17 @@ public class PlayerInteraction : MonoBehaviour
     private Dictionary<GameObject, Material[]> originalMaterials = new Dictionary<GameObject, Material[]>();
     public void HighlightFocusedInteractable(GameObject previousInteractable, GameObject newInteractable) {
 
+        //----------GRID TILE DISPLAY----------
+        
+        // if(previousInteractable != null) {
+        //     previousInteractable.GetComponent<GridTile>().HideDisplay();
+        // }
+        // if(!PlacementHandler.instance.inPlacementMode) {
+        //     if(newInteractable != null) {
+        //         newInteractable.GetComponent<GridTile>().ShowDisplay();
+        //     }
+        // }
+
         //----------SCALE----------
 
         if(previousInteractable != null) {

@@ -1,20 +1,20 @@
 using UnityEngine;
 using UnityEditor;
 
-[CreateAssetMenu(fileName = "NewBuildable", menuName = "Grid/Buildable")]
+[CreateAssetMenu(fileName = "NewBuildable", menuName = "Game/Buildable")]
 public class Buildable : ScriptableObject
 {
     [SerializeField] private Sprite _icon;
     [SerializeField] private string _description;
     [SerializeField] private int _environmentEffect;
-    [SerializeField] private int _communnityEffect;
+    [SerializeField] private int _happinessEffect;
     [SerializeField] private int _economyEffect;
     [SerializeField] private GameObject _tile;
 
     public Sprite icon { get => _icon; set => _icon = value; }
     public string description { get => _description; set => _description = value; }
     public int environmentEffect { get => _environmentEffect; set => _environmentEffect = value; }
-    public int communityEffect { get => _communnityEffect; set => _communnityEffect = value; }
+    public int happinessEffect { get => _happinessEffect; set => _happinessEffect = value; }
     public int economyEffect { get => _economyEffect; set => _economyEffect = value; }
     public GameObject tile { get => _tile; set => _tile = value; }
 }
@@ -50,7 +50,7 @@ public class ItemEditor : Editor
         DrawHeader("Effects");
 
         script.environmentEffect = (int)EditorGUILayout.Slider("Environment", script.environmentEffect, -3, 3);
-        script.communityEffect = (int)EditorGUILayout.Slider("Community", script.communityEffect, -3, 3);
+        script.happinessEffect = (int)EditorGUILayout.Slider("Happiness", script.happinessEffect, -3, 3);
         script.economyEffect = (int)EditorGUILayout.Slider("Economy", script.economyEffect, -3, 3);
 
         // REFERENCES SECTION

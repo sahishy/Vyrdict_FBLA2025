@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: d97bd8e6bc7dd42188a6f06195ec62ef, type: 3}
   _description: A powerful generator of energy.
-  _environmentEffect: -2
-  _communnityEffect: -1
+  _environmentEffect: 1
+  _happinessEffect: 1
   _economyEffect: 2
-  _tile: {fileID: 0}
+  _tile: {fileID: 785533363806751733, guid: 4881831e23ab849278461631e04fa6c6, type: 3}

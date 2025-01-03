@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b9fbcb5b786c46f985330a5c2b26d72, type: 3}
+  m_Name: Noise
+  m_EditorClassIdentifier: 
+  environmentEffect: 0
+  happinessEffect: -1
+  economyEffect: 0
+  stacks: 1
+  rootBuildables:
+  - {fileID: 11400000, guid: 8d722b48182a2466f9dc1523f59336a0, type: 2}
+  branchBuildables:
+  - {fileID: 11400000, guid: 3f9f0f416eacaa2498537aac6c0ad555, type: 2}
+  - {fileID: 11400000, guid: 98e1b451738204522b9a2c2cca69aa9d, type: 2}

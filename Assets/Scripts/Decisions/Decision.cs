@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewDecision", menuName = "Decisions/Decision")]
+[CreateAssetMenu(fileName = "NewDecision", menuName = "Game/Decision")]
 public class Decision : ScriptableObject
 {
     public Buildable buildable;

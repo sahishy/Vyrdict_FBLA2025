@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridTile : MonoBehaviour, Interactable
@@ -9,13 +10,29 @@ public class GridTile : MonoBehaviour, Interactable
     [Header("Tile")]
     public Buildable currentBuildable = null;
     private GameObject currentBuildableObject = null;
+    public List<GridTile> neighbors = new List<GridTile>();
+    //root
+    [Header("Connections - Root")]
+    public Color32 rootColor;
+    public Connection rootConnection = null;
+    public List<GridTile> branchNeighbors = new List<GridTile>();
+    [Header("Connections - Branch")]
+    public GridTile rootNeighbor = null; 
+    //public Dictionary<Direction, GridTile> neighbors = new Dictionary<Direction, GridTile>();
 
     [Header("References")]
     public Transform holder;
     public Transform display;
     private bool displayActive = false;
-    private GameObject tileModel;
+
     public List<GameObject> tileModels = new List<GameObject>();
+    private GameObject tileModel;
+
+    void Start() {
+        rootColor = new Color32((byte)Random.Range(0, 255), (byte)Random.Range(0, 255), (byte)Random.Range(0, 255), 255); 
+    }
+
+    //-----------------------------BUILDABLE-----------------------------
 
     public void Initialize(Buildable buildable = null) {
         //CREATING BASE TILE
@@ -31,7 +48,7 @@ public class GridTile : MonoBehaviour, Interactable
         if(buildable != null) {
             AddBuildable(buildable, PlacementHandler.instance.rotations[Random.Range(0, 5)]);
         }
-    }
+    }    
 
     public void AddBuildable(Buildable buildable, Vector3 rotation) {
         currentBuildable = buildable;
@@ -48,14 +65,50 @@ public class GridTile : MonoBehaviour, Interactable
 
         Destroy(currentBuildableObject);
     }
- 
+
+    //-----------------------------INTERACTABLE-----------------------------
+
     public void Interact()
     {
-        //Debug.Log(currentBuildable != null ? currentBuildable.name : "Empty");
+        if(!PlacementHandler.instance.inPlacementMode) { 
+            int count = 0;
+            List<ConnectionGroup> connectionGroups = ConnectionsHandler.instance.GetConnectionGroups(this);
+            foreach(ConnectionGroup connectionGroup in connectionGroups) {
+            
+                Debug.Log($"{count}: {connectionGroup.connection.name}");
+                foreach(GridTile tile in connectionGroup.tiles) {
+                    Debug.Log($"------{(tile == this ? "(THIS) " : "")}{tile.currentBuildable} @ {tile.gameObject.name}");
+                }
+                
+                count++;
+
+            }
+        }
+        // if(displayActive) {
+        //     HideDisplay();
+        // } else {
+        //     ShowDisplay();
+        // }
     }
 
     public GameObject GetGameObject()
     {
         return gameObject;
+    }
+
+    //-----------------------------DISPLAY-----------------------------
+
+    private void ShowDisplay() {
+        if(currentBuildable != null) {
+            displayActive = true;
+            TileDisplayHandler.instance.ShowDisplay(currentBuildable);
+        } else {
+            displayActive = false;
+            TileDisplayHandler.instance.HideDisplay();
+        }
+    }
+    private void HideDisplay() {
+        displayActive = false;
+        TileDisplayHandler.instance.HideDisplay();
     }
 }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 83f0a2e976abd42a993f62825a89f4db, type: 3}
   _description: A large cave where valuable resources can be found.
-  _environmentEffect: -2
-  _communnityEffect: -2
+  _environmentEffect: -3
+  _happinessEffect: -1
   _economyEffect: 3
-  _tile: {fileID: 0}
+  _tile: {fileID: 7487897110024336502, guid: 9817b7107e8f241b19bc5f246373ca30, type: 3}
