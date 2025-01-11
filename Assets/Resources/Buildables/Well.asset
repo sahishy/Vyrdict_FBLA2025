@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: incomplete
-  _environmentEffect: 2
-  _happinessEffect: 1
+  _environmentEffect: 1
+  _happinessEffect: 0
   _economyEffect: 0
   _tile: {fileID: 3280555211037798102, guid: a35b06bfbd6654d82b457ee4e4ca313b, type: 3}

@@ -16,5 +16,5 @@ MonoBehaviour:
   _description: A huge field where useful crops can be grown.
   _environmentEffect: -1
   _happinessEffect: 0
-  _economyEffect: 2
+  _economyEffect: 1
   _tile: {fileID: 916039603287960935, guid: 9aa46cee6dc5343b89190183e9608067, type: 3}

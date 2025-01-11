@@ -1,15 +1,19 @@
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InventoryHandler : MonoBehaviour
 {
     public static InventoryHandler instance;
     private Dictionary<Buildable, ItemData> inventory = new Dictionary<Buildable, ItemData>();
+    public int maxCapacity;
 
     [Header("References")]
     public List<Buildable> testItems;
     public GameObject inventoryItemPrefab;
     public Transform inventoryItemHolder;
+    [SerializeField] private TMP_Text capacityText;
 
     void Awake() {
         instance = this;
@@ -17,29 +21,38 @@ public class InventoryHandler : MonoBehaviour
 
     void Start() {
         foreach(Buildable item in testItems) {
-            AddItem(item, 10);
+            TryAddItem(item, 2);
         }
     }
     
-    public void AddItem(Buildable buildable, int _amount = 1) {
+    public bool TryAddItem(Buildable buildable, int _amount = 1) {
 
-        if(inventory.ContainsKey(buildable)) {
+        if(inventory.Count < maxCapacity) {
+            if(inventory.ContainsKey(buildable)) {
 
-            inventory[buildable].amount += _amount;
+                inventory[buildable].amount += _amount;
 
+            } else {
+
+                GameObject itemUI = Instantiate(inventoryItemPrefab, inventoryItemHolder);
+                itemUI.GetComponent<InventoryItemUI>().Initialize(buildable);         
+
+                inventory.Add(buildable, new ItemData() {
+                    amount = _amount,
+                    itemUI = itemUI.GetComponent<InventoryItemUI>()
+                });
+
+            }
+            
+            inventory[buildable].itemUI.UpdateAmount(inventory[buildable].amount);
+
+            UpdateUI();        
+
+            return true;    
         } else {
-
-            GameObject itemUI = Instantiate(inventoryItemPrefab, inventoryItemHolder);
-            itemUI.GetComponent<InventoryItem>().Initialize(buildable);         
-
-            inventory.Add(buildable, new ItemData() {
-                amount = _amount,
-                itemUI = itemUI.GetComponent<InventoryItem>()
-            });
-
+            return false;
         }
-        
-        inventory[buildable].itemUI.UpdateAmount(inventory[buildable].amount);
+
     }
 
     public void RemoveItem(Buildable buildable, int _amount = 1) {
@@ -57,10 +70,18 @@ public class InventoryHandler : MonoBehaviour
             }
         }
 
+        UpdateUI();
+    }
+
+    private void UpdateUI() {
+        int amount = inventory.Count;
+        capacityText.text = $"{amount}/{maxCapacity}";
+        capacityText.color = amount == maxCapacity ? new Color32(255, 255, 255, 100) : new Color32(255, 255, 255, 255);
+        capacityText.gameObject.SetActive(amount > 0);
     }
 }
 
 public class ItemData {
     public int amount;
-    public InventoryItem itemUI;
+    public InventoryItemUI itemUI;
 }

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2886208cc821a49803b041987ee2f2, type: 3}
+  m_Name: Manor
+  m_EditorClassIdentifier: 
+  _icon: {fileID: 21300000, guid: 491660c365d7c448db1cb9fb7f4dd84c, type: 3}
+  _description: 'A large and spacious home where big families can live.
+
+    (Upgrades
+    from: Small Home)'
+  _environmentEffect: -3
+  _happinessEffect: 3
+  _economyEffect: 0
+  _upgrade: {fileID: 0}
+  _tile: {fileID: 6082287250297484355, guid: 09e7857430abf444da3083166a93b484, type: 3}

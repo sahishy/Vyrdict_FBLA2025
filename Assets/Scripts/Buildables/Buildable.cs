@@ -9,6 +9,7 @@ public class Buildable : ScriptableObject
     [SerializeField] private int _environmentEffect;
     [SerializeField] private int _happinessEffect;
     [SerializeField] private int _economyEffect;
+    [SerializeField] private Buildable _upgrade;
     [SerializeField] private GameObject _tile;
 
     public Sprite icon { get => _icon; set => _icon = value; }
@@ -16,6 +17,7 @@ public class Buildable : ScriptableObject
     public int environmentEffect { get => _environmentEffect; set => _environmentEffect = value; }
     public int happinessEffect { get => _happinessEffect; set => _happinessEffect = value; }
     public int economyEffect { get => _economyEffect; set => _economyEffect = value; }
+    public Buildable upgrade { get => _upgrade; set => _upgrade = value; }
     public GameObject tile { get => _tile; set => _tile = value; }
 }
 
@@ -49,14 +51,15 @@ public class ItemEditor : Editor
         DrawHorizontalRule();
         DrawHeader("Effects");
 
-        script.environmentEffect = (int)EditorGUILayout.Slider("Environment", script.environmentEffect, -3, 3);
-        script.happinessEffect = (int)EditorGUILayout.Slider("Happiness", script.happinessEffect, -3, 3);
-        script.economyEffect = (int)EditorGUILayout.Slider("Economy", script.economyEffect, -3, 3);
+        script.environmentEffect = (int)EditorGUILayout.Slider("Environment", script.environmentEffect, -5, 5);
+        script.happinessEffect = (int)EditorGUILayout.Slider("Happiness", script.happinessEffect, -5, 5);
+        script.economyEffect = (int)EditorGUILayout.Slider("Economy", script.economyEffect, -5, 5);
 
         // REFERENCES SECTION
         DrawHorizontalRule();
         DrawHeader("References");
 
+        script.upgrade = EditorGUILayout.ObjectField("Upgrade", script.upgrade, typeof(Buildable), false) as Buildable;
         script.tile = EditorGUILayout.ObjectField("Tile", script.tile, typeof(GameObject), false) as GameObject;
 
         if(GUILayout.Button("Auto-Assign Prefab")) {

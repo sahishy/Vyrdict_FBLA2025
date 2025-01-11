@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -11,7 +13,7 @@ public class DecisionHandler : MonoBehaviour
     public bool inDecisionMode = false;
     private bool cooldown = false;
 
-    public Decision testDecision;
+    private List<Decision> allDecisions = new List<Decision>();
 
     [Header("References")]
     [SerializeField] private GameObject gameplayScreen;
@@ -19,6 +21,9 @@ public class DecisionHandler : MonoBehaviour
 
     [SerializeField] private TMP_Text weekCounter;
     [SerializeField] private TMP_Text label;
+
+    [SerializeField] private TMP_Text eventLabel;
+    [SerializeField] private TMP_Text eventEffect;
 
     [SerializeField] private RectTransform weekStatsHolder;
     [SerializeField] private Image environmentBar;
@@ -36,7 +41,11 @@ public class DecisionHandler : MonoBehaviour
 
     void Awake() {
         instance = this;
+
+        allDecisions = Resources.LoadAll<Decision>("Decisions").ToList();
     }
+
+    //--------------------------------------DECISIONS--------------------------------------
 
     //Called in the game loop at the start of each week, or 7 day period
     public void ProposeDecision() {
@@ -51,13 +60,101 @@ public class DecisionHandler : MonoBehaviour
             gameplayScreen.SetActive(false);
         });
 
+        //CLOSE ACTIVE PROCESSES
         if(PlacementHandler.instance.inPlacementMode) {
             PlacementHandler.instance.ExitPlacementMode();
+        }
+        if(DialogueHandler.instance.activeDialogue) {
+            DialogueHandler.instance.CloseDialogue();
         }
 
         //STARTING ANIMATION
         StartCoroutine(DecisionMakingAnimation());
     }
+    //Creates choices slowly, makes sure player isn't overwhelmed by all at once
+    private void ChoiceCreation() {
+        List<Decision> topDecisions = GetTopDecisions();
+
+        for(int i = 0; i < 3; i++) {
+            DecisionChoice choice = Instantiate(decisionChoicePrefab, decisionChoiceHolder.transform).GetComponent<DecisionChoice>();
+            choice.Initialize(topDecisions[i], i);
+        }
+    }
+    //Resets cooldown to prevent player from accidentally selecting a choice the second it appears
+    private void DecisionCooldown() {
+        cooldown = false;
+    }
+    //Called when player selects a choice in the decision screen
+    public void SelectChoice(Decision decision) {
+        if(cooldown) {
+            return;
+        }
+
+        //unfocus any animatable
+        GameHandler.instance.currentFocusedAnimatable.AnimatableExit();
+
+        //closing animation
+        decisionScreen.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() => {
+            decisionScreen.SetActive(false); 
+        });
+        gameplayScreen.SetActive(true);
+        gameplayScreen.GetComponent<CanvasGroup>().DOFade(1, 0.5f);
+
+        Invoke(nameof(ResetDecisionMakingAnimation), 1f);
+
+        //add choice to inventory
+        InventoryHandler.instance.TryAddItem(decision.buildable, decision.amount);
+
+        inDecisionMode = false;
+        cooldown = false;
+
+        //RESUME THE WEEK
+        GameHandler.instance.StartWeek();
+    }
+
+    //Returns the best 3 decisions to give the player based on their current stats
+    public List<Decision> GetTopDecisions() {
+        // Create a dictionary to store each decision and its score
+        Dictionary<Decision, float> decisionScores = new Dictionary<Decision, float>();
+
+        // Evaluate each decision based on relevance
+        foreach (Decision decision in allDecisions) {
+            Buildable buildable = decision.buildable;
+            int amount = decision.amount;
+
+            // Calculate the potential stat changes from the buildable
+            int environmentEffect = buildable.environmentEffect * amount;
+            int happinessEffect = buildable.happinessEffect * amount;
+            int economyEffect = buildable.economyEffect * amount;
+
+            // Score the decision based on the player's current stat needs
+            float score = 0;
+
+            // Prioritize decisions that address deficits
+            if (StatsHandler.instance.environment < 50) score += environmentEffect * 1.5f;
+            else score += environmentEffect;
+
+            if (StatsHandler.instance.happiness < 50) score += happinessEffect * 1.5f;
+            else score += happinessEffect;
+
+            if (StatsHandler.instance.economy < 50) score += economyEffect * 1.5f;
+            else score += economyEffect;
+
+            // Avoid decisions that worsen stats already in deficit
+            if (StatsHandler.instance.environment < 50 && environmentEffect < 0) score -= Mathf.Abs(environmentEffect) * 2;
+            if (StatsHandler.instance.happiness < 50 && happinessEffect < 0) score -= Mathf.Abs(happinessEffect) * 2;
+            if (StatsHandler.instance.economy < 50 && economyEffect < 0) score -= Mathf.Abs(economyEffect) * 2;
+
+            // Add the score to the dictionary
+            decisionScores.Add(decision, score);
+        }
+
+        // Sort decisions by score and return the top 3
+        return decisionScores.OrderByDescending(pair => pair.Value).Select(pair => pair.Key).Take(3).ToList();
+    }
+
+    //--------------------------------------UI--------------------------------------
+
     //Animation that handles showing all the important factors one at a time
     private IEnumerator DecisionMakingAnimation() {
         
@@ -119,10 +216,10 @@ public class DecisionHandler : MonoBehaviour
         label.DOFade(0, 1f);
         yield return new WaitForSeconds(1f);
 
-        weekStatsHolder.DOAnchorPos(new Vector2(0, 315), 2f).SetEase(Ease.InOutBack);
-        weekStatsHolder.transform.DOScale(0.575f, 2f).SetEase(Ease.InOutBack);
-        weekStatsTextHolder.DOAnchorPos(new Vector2(0, 280), 2f).SetEase(Ease.InOutBack);
-        weekStatsTextHolder.transform.DOScale(0.575f, 2f).SetEase(Ease.InOutBack);
+        weekStatsHolder.DOAnchorPos(new Vector2(0, 315), 2f).SetEase(Ease.InOutCubic);
+        weekStatsHolder.transform.DOScale(0.575f, 2f).SetEase(Ease.InOutCubic);
+        weekStatsTextHolder.DOAnchorPos(new Vector2(0, 280), 2f).SetEase(Ease.InOutCubic);
+        weekStatsTextHolder.transform.DOScale(0.575f, 2f).SetEase(Ease.InOutCubic);
         yield return new WaitForSeconds(2f);
 
         label.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 200);
@@ -133,43 +230,6 @@ public class DecisionHandler : MonoBehaviour
 
         //CREATING CHOICES
         ChoiceCreation();
-    }
-    //Creates choices slowly, makes sure player isn't overwhelmed by all at once
-    private void ChoiceCreation() {
-      for(int i = 0; i < 3; i++) {
-            DecisionChoice choice = Instantiate(decisionChoicePrefab, decisionChoiceHolder.transform).GetComponent<DecisionChoice>();
-            choice.Initialize(testDecision, i);
-        }
-    }
-    //Resets cooldown to prevent player from accidentally selecting a choice the second it appears
-    private void DecisionCooldown() {
-        cooldown = false;
-    }
-    //Called when player selects a choice in the decision screen
-    public void SelectChoice(Decision decision) {
-        if(cooldown) {
-            return;
-        }
-
-        //unfocus any animatable
-        GameHandler.instance.currentFocusedAnimatable?.AnimatableExit();
-
-        //closing animation
-        decisionScreen.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() => {
-            decisionScreen.SetActive(false); 
-        });
-        gameplayScreen.SetActive(true);
-        gameplayScreen.GetComponent<CanvasGroup>().DOFade(1, 0.5f);
-
-        Invoke(nameof(ResetDecisionMakingAnimation), 1f);
-
-        //add choice to inventory
-        InventoryHandler.instance.AddItem(decision.buildable, decision.amount);
-
-        inDecisionMode = false;
-        cooldown = false;
-
-        GameHandler.instance.timeFrozen = false;
     }
     //Reset the changes made by animation in DecisionMakingAnimation()
     private void ResetDecisionMakingAnimation() {

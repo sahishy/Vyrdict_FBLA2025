@@ -3,19 +3,27 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
 
 public class GameHandler : MonoBehaviour, Animatable
 {
     public static GameHandler instance;
 
     [Header("Time")]
-    public bool timeFrozen = false;
+    public bool timeFrozen = true;
     public int currentDay = 0;
     public int currentWeek = 0;
 
+    [Header("Factors")]
+    [SerializeField] private List<Factor> startingFactors = new List<Factor>();
+
     [Header("Settings")]
     [SerializeField] private float dayDuration = 10f;
+    [HideInInspector] public float timer;
     private float dayTimer;
+    [HideInInspector] public float timeScale = 1;
+    private float housingSpawnChance = 1f;
 
     [Header("Animation")]
     public Animatable currentFocusedAnimatable = null;
@@ -27,21 +35,51 @@ public class GameHandler : MonoBehaviour, Animatable
     [SerializeField] private TMP_Text weekText;
 
     private bool timeInformationActive = false;
-    private bool statsInformationActive = false;
+    private int statsInformationIndex = -1;
     [SerializeField] private Transform timeInformationPanel;
+    [SerializeField] private Image timeInformationSpeedImage;
+    [SerializeField] private List<Sprite> timeInformationSpeedIcons;
     [SerializeField] private Transform statsInformationPanel;
     [SerializeField] private List<Transform> statsInformationPanels = new List<Transform>();
 
     void Awake() {
         instance = this;
+
+        DOTween.SetTweensCapacity(500, 50);
+        gameplayScreen.alpha = 0;
     }
 
-    void Start() {
-        gameplayScreen.alpha = 0;
-        Invoke(nameof(IntroAnimation), 1f);
-        DOTween.SetTweensCapacity(500, 50);
+    //Starting method called at the start of the game (CALLED BY GridHandler, MAKES SURE MAP IS CREATED)
+    public IEnumerator StartGame() {
 
+        //INTRO ANIMATION
+        Invoke(nameof(IntroAnimation), 1f);
+
+        //START WEEK
+        //make sure map is generated before starting week, events depend on the map
+        StartWeek();
+
+        //UPDATE UI
         UpdateTimeUI();
+        StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>(), 1f));
+
+        //STARTING PROCESS - create factors, two starter houses, cutscene, dialogue
+
+        //factors
+        foreach(Factor factor in startingFactors) {
+            FactorsHandler.instance.AddFactor(factor);
+        }
+
+        //show the starting emote for the two houses
+        ConnectionGroup targetNeighborsGroup = ConnectionsHandler.instance.connectionGroups.FirstOrDefault(x => x.connection.name == "Neighbors");
+        EmoteHandler.instance.CreateEmote(Emote.Sad, targetNeighborsGroup, 5f);
+        //animation for focusing on two houses
+        PlayerController.instance.CameraZoom(ConnectionsHandler.instance.GetAverageConnectionGroupTilePosition(targetNeighborsGroup), 4f, 2f, 2f, 3f);
+        
+        //show starting dialogue
+        yield return new WaitForSeconds(5f);
+        DialogueHandler.instance.AddDialogue("This is your community. They feel cramped living in such a small town.");
+        DialogueHandler.instance.AddDialogue("The population won't fit in these two tents for long. The community is growing at a rapid rate.");
     }
 
     void Update() {
@@ -52,7 +90,9 @@ public class GameHandler : MonoBehaviour, Animatable
 
     //Handles the progression of time
     private void TimeProgression() {
-        dayTimer += Time.deltaTime;
+        float time = Time.deltaTime * timeScale;
+        timer += time;
+        dayTimer += time;
         if (dayTimer >= dayDuration) {
             EndDay();
             dayTimer = 0;
@@ -69,24 +109,40 @@ public class GameHandler : MonoBehaviour, Animatable
     private void EndDay() {
         currentDay++;
         if(currentDay % 7 == 0) {
-            currentWeek++;
-            
-            timeFrozen = true;
-            DecisionHandler.instance.ProposeDecision();
-            //timeFrozen is set to false in DecisionHandler.SelectChoice()
+            EndWeek();
+        }
+
+        //GAME LOOP - create random housing every 3 days
+        if(Random.Range(0f, 100f) > housingSpawnChance) {
+            housingSpawnChance = 1;
+            SpawnHousing();
+        } else {
+            housingSpawnChance *= 3; //1, 3, 9, 27, 81, 100+
         }
 
         StatsHandler.instance.UpdateStats();
         CheckGameOver();
 
+        //UPDATE ACTIVE UI - make sure to update UI that is open after stats are updated
         UpdateTimeUI();
+        if(statsInformationIndex != -1) {
+            StatsHandler.instance.ShowStatsInformation(statsInformationIndex);
+        }
     }
 
-    private void UpdateTimeUI() {
-        dayText.text = $"Day {currentDay}";
-        dayText.transform.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
-        dayBar.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
-        weekText.text = $"Week {Mathf.FloorToInt(currentWeek / 7)}";
+    //Called at the end of each week
+    private void EndWeek() {
+        currentWeek++;
+        
+        ToggleTimeFreeze(true);
+        DecisionHandler.instance.ProposeDecision();
+        //timeFrozen is set to false in DecisionHandler.SelectChoice()
+        
+    }
+
+    //Called at the start of each week by DecisionHandler
+    public void StartWeek() {
+        ToggleTimeFreeze(false);
     }
 
     //Checks if any of the stats reached zero at the end of a day, if so then the player lost
@@ -96,17 +152,71 @@ public class GameHandler : MonoBehaviour, Animatable
         }
     }
 
+    //Toggle time freezing
+    public void ToggleTimeFreeze(bool toggle) {
+        timeFrozen = toggle;
+        if(timeFrozen) {
+            dayBar.DOFade(0.5f, 0.5f);
+        } else {
+            if(timeScale != 0) {
+                dayBar.DOFade(1f, 0.5f);
+            }
+        }
+    }
+
     private void EndGame() {
         Debug.Log($"Game Over! Survived {currentDay} days and {currentWeek} weeks.");
     }
 
+    ////--------------------------------------GAME LOOP--------------------------------------
+    private void SpawnHousing() {
+        List<GridTile> availableSpots = GridHandler.instance.GetUnoccupiedTiles();
+        GridTile targetSpot = availableSpots[Random.Range(0, availableSpots.Count)];
+        Vector3 randomRotation = PlacementHandler.instance.rotations[Random.Range(0, 6)];
+
+        Buildable houseBuildable = Resources.Load<Buildable>("Buildables/Tent");
+        PlacementHandler.instance.AddBuildable(houseBuildable, randomRotation, targetSpot);
+
+        //add connections buildable has with adjacent tiles, if any
+        ConnectionsHandler.instance.TryAddConnections(targetSpot);
+    }
 
     //--------------------------------------GAME INTRO--------------------------------------
     private void IntroAnimation() {
         gameplayScreen.DOFade(1f, 3f);
     }
 
-    //--------------------------------------UI ANIMATIONS--------------------------------------
+    //--------------------------------------UI--------------------------------------
+    private void UpdateTimeUI() {
+        dayText.text = $"Day {currentDay}";
+        dayText.transform.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
+        dayBar.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
+        weekText.text = $"Week {currentWeek}";
+
+        RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>());
+    }
+    private IEnumerator RefreshContentSizeFitter(ContentSizeFitter contentSizeFitter, float delay = 0f) {
+        yield return new WaitForSeconds(delay);
+        contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        yield return null;
+        contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.MinSize;
+    }
+    public void ChangeTimeScale(float value) {
+        List<float> timeScales = new List<float> {
+            0, //freeze (slider 0)
+            0.5f, //slow (slider 1)
+            1, //default (slider 2)
+            2, //fast (slider 3)
+            4 //super fast (slider 4)
+        };
+        timeScale = timeScales[(int)value];
+        if(!timeFrozen) {
+            dayBar.DOFade(timeScale == 0 ? 0.5f : 1f, 0.5f);
+        }
+
+        timeInformationSpeedImage.sprite = timeInformationSpeedIcons[(int)value];
+    }
+
     public void ShowTimeInformation() {
         timeInformationActive = true;
         currentFocusedAnimatable = this;
@@ -120,7 +230,7 @@ public class GameHandler : MonoBehaviour, Animatable
     }
 
     public void ShowStatsInformation(int index) {
-        statsInformationActive = true;
+        statsInformationIndex = index;
         currentFocusedAnimatable = this;
 
         statsInformationPanel.DOScaleY(1, 0.2f).SetEase(Ease.OutBack);
@@ -128,10 +238,10 @@ public class GameHandler : MonoBehaviour, Animatable
         StatsHandler.instance.ShowStatsInformation(index);
     }
     public void HideStatsInformation(int index = -1) {
-        statsInformationActive = false;
+        statsInformationIndex = -1;
 
         statsInformationPanel.DOScaleY(0, 0.2f).SetEase(Ease.InBack).OnComplete(() => {
-            if(!statsInformationActive) { //prevents panel from disappearing when player switches mid-animation
+            if(statsInformationIndex == -1) { //prevents panel from disappearing when player switches mid-animation
                 if(index != -1) { //make sure index was defined
                     //statsInformationPanels[index].gameObject.SetActive(false);
                 }
@@ -145,7 +255,7 @@ public class GameHandler : MonoBehaviour, Animatable
         if(timeInformationActive) {
             HideTimeInformation();
         }
-        if(statsInformationActive) {
+        if(statsInformationIndex != -1) {
             HideStatsInformation();
         }
     }

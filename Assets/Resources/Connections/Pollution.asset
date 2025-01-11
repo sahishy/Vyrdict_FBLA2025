@@ -15,7 +15,6 @@ MonoBehaviour:
   environmentEffect: -1
   happinessEffect: 0
   economyEffect: 0
-  stacks: 1
   rootBuildables:
   - {fileID: 11400000, guid: 231ccf370606a4fe1bf886bfa6c42c54, type: 2}
   branchBuildables:

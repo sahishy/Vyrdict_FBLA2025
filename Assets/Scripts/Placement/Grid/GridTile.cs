@@ -9,7 +9,7 @@ public class GridTile : MonoBehaviour, Interactable
 {
     [Header("Tile")]
     public Buildable currentBuildable = null;
-    private GameObject currentBuildableObject = null;
+    [HideInInspector] public GameObject currentBuildableObject = null;
     public List<GridTile> neighbors = new List<GridTile>();
     //root
     [Header("Connections - Root")]
@@ -22,8 +22,7 @@ public class GridTile : MonoBehaviour, Interactable
 
     [Header("References")]
     public Transform holder;
-    public Transform display;
-    private bool displayActive = false;
+    public GameObject focusDisplay;
 
     public List<GameObject> tileModels = new List<GameObject>();
     private GameObject tileModel;
@@ -51,6 +50,11 @@ public class GridTile : MonoBehaviour, Interactable
     }    
 
     public void AddBuildable(Buildable buildable, Vector3 rotation) {
+        //DELETE ANY EXISTING BUILDABLE IF ANY
+        PlacementHandler.instance.RemoveBuildable(this);
+        RemoveBuildable();
+
+        //CREATE NEW BUILDABLE
         currentBuildable = buildable;
 
         currentBuildableObject = Instantiate(currentBuildable.tile, holder);
@@ -70,25 +74,22 @@ public class GridTile : MonoBehaviour, Interactable
 
     public void Interact()
     {
-        if(!PlacementHandler.instance.inPlacementMode) { 
-            int count = 0;
-            List<ConnectionGroup> connectionGroups = ConnectionsHandler.instance.GetConnectionGroups(this);
-            foreach(ConnectionGroup connectionGroup in connectionGroups) {
+        // if(!PlacementHandler.instance.inPlacementMode) { 
+        //     int count = 0;
+        //     List<ConnectionGroup> connectionGroups = ConnectionsHandler.instance.GetConnectionGroups(this);
+        //     foreach(ConnectionGroup connectionGroup in connectionGroups) {
             
-                Debug.Log($"{count}: {connectionGroup.connection.name}");
-                foreach(GridTile tile in connectionGroup.tiles) {
-                    Debug.Log($"------{(tile == this ? "(THIS) " : "")}{tile.currentBuildable} @ {tile.gameObject.name}");
-                }
+        //         Debug.Log($"{count}: {connectionGroup.connection.name}");
+        //         foreach(GridTile tile in connectionGroup.tiles) {
+        //             Debug.Log($"------{(tile == this ? "(THIS) " : "")}{tile.currentBuildable} @ {tile.gameObject.name}");
+        //         }
                 
-                count++;
+        //         count++;
 
-            }
-        }
-        // if(displayActive) {
-        //     HideDisplay();
-        // } else {
-        //     ShowDisplay();
+        //     }
         // }
+
+        Display();
     }
 
     public GameObject GetGameObject()
@@ -98,17 +99,15 @@ public class GridTile : MonoBehaviour, Interactable
 
     //-----------------------------DISPLAY-----------------------------
 
-    private void ShowDisplay() {
+    private void Display() {
         if(currentBuildable != null) {
-            displayActive = true;
-            TileDisplayHandler.instance.ShowDisplay(currentBuildable);
+            TileDisplayHandler.instance.ShowDisplay(this);
         } else {
-            displayActive = false;
             TileDisplayHandler.instance.HideDisplay();
         }
     }
-    private void HideDisplay() {
-        displayActive = false;
-        TileDisplayHandler.instance.HideDisplay();
+
+    public void ToggleFocusDisplay(bool toggle) {
+        focusDisplay.SetActive(toggle);
     }
 }

@@ -1,24 +1,129 @@
+using System.Collections;
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class TileDisplayHandler : MonoBehaviour
+public class TileDisplayHandler : MonoBehaviour, Animatable
 {
     public static TileDisplayHandler instance;
-    public bool displayActive = false;
+    private GridTile displayedTile = null;
+
+    [Header("References")]
+    [SerializeField] private GameObject display;
+    [SerializeField] private RectTransform displayPanel;
+    [SerializeField] private Image buildableIcon;
+    [SerializeField] private TMP_Text buildableName;
+    [SerializeField] private TMP_Text buildableDescription;
+    private bool panelToggling = false; //used to prevent hover animation from happening while the UI is already opening/closing
 
     void Awake() {
         instance = this;
     }
 
-    public void ShowDisplay(Buildable buildable) {
-        displayActive = true;
-        Debug.Log($"Display Shown: {buildable.name}");
+    public void ShowDisplay(GridTile tile) {
+        //prevents unwanted display right after placing something down 
+        if(PlacementHandler.instance.inPlacementMode) {
+            return;
+        }
+
+        //toggles display off if the same tile is clicked again
+        if(displayedTile == tile) {
+            HideDisplay();
+            return;
+        }
+
+        //store tile
+        displayedTile = tile;
+
+        //---DISPLAY UI---
+        buildableIcon.sprite = tile.currentBuildable.icon;
+        buildableName.text = tile.currentBuildable.name;
+        buildableDescription.text = tile.currentBuildable.description;
+        Debug.Log($"Display Shown: {tile.currentBuildable.name}");
+
+        displayedTile.ToggleFocusDisplay(true);
+
+        //show connections
+        foreach(ConnectionGroup group in ConnectionsHandler.instance.GetConnectionGroups(tile)) {
+            Transform holder = ConnectionsHandler.instance.connectionLineHolder.Find(group.id);
+            holder.gameObject.SetActive(true);
+        }
+
+        //opening animation
+        panelToggling = true;
+        if(!display.activeSelf) {
+            display.SetActive(true);
+            displayPanel.DOAnchorPos(new Vector2(0, 40), 0.5f).SetEase(Ease.OutBack).OnComplete(() => {
+                panelToggling = false;
+            });
+        }
+
+        StartCoroutine(RefreshContentSizeFitter());
     }
     public void HideDisplay() {
-        if(!displayActive) {
+        if(displayedTile == null) {
             return;
         }
         
-        displayActive = false;
         Debug.Log("Display Hidden");
+
+        displayedTile.ToggleFocusDisplay(false);
+
+        //hide connections
+        foreach(ConnectionGroup group in ConnectionsHandler.instance.GetConnectionGroups(displayedTile)) {
+            Transform holder = ConnectionsHandler.instance.connectionLineHolder.Find(group.id);
+            holder.gameObject.SetActive(false);
+        }
+
+        //reset tile
+        displayedTile = null;
+
+        //closing animation
+        panelToggling = true;
+        displayPanel.DOAnchorPos(new Vector2(0, displayPanel.sizeDelta.y * -1f), 0.5f).SetEase(Ease.InBack).OnComplete(() => {
+            display.SetActive(false);
+            panelToggling = false;
+        });
+    }
+
+    //----------------------------UI----------------------------
+
+    private IEnumerator RefreshContentSizeFitter() {
+        displayPanel.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+        yield return null;
+        displayPanel.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.MinSize;
+    }
+
+    public void PanelEnter() {
+        if(panelToggling) {
+            return;
+        }
+
+        panelToggling = true;
+        displayPanel.DOAnchorPos(new Vector2(0, 30), 0.2f).OnComplete(() => {
+            panelToggling = false;
+        });
+        GameHandler.instance.currentFocusedAnimatable = this;
+    }
+
+    public void PanelExit() {
+        if(panelToggling) {
+            return;
+        }
+
+        panelToggling = true;
+        displayPanel.DOAnchorPos(new Vector2(0, 40), 0.2f).OnComplete(() => {
+            panelToggling = false;
+        });
+    }
+
+    public void PanelClick() {
+        HideDisplay();
+    }
+
+    public void AnimatableExit()
+    {
+        PanelExit();
     }
 }

@@ -15,6 +15,6 @@ MonoBehaviour:
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: incomplete
   _environmentEffect: -1
-  _happinessEffect: 3
+  _happinessEffect: 2
   _economyEffect: 0
   _tile: {fileID: 3920665139268045884, guid: 64ceba78b87bf456fbf6b92a6f8ecc18, type: 3}

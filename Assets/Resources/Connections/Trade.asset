@@ -15,10 +15,12 @@ MonoBehaviour:
   environmentEffect: 0
   happinessEffect: 0
   economyEffect: 1
-  stacks: 1
   rootBuildables:
   - {fileID: 11400000, guid: 1a4af4e213a0e4f5aa2c3037edacc992, type: 2}
+  - {fileID: 11400000, guid: 6ed589ef897f044ca87de3a38f828983, type: 2}
   branchBuildables:
   - {fileID: 11400000, guid: 1a4af4e213a0e4f5aa2c3037edacc992, type: 2}
+  - {fileID: 11400000, guid: 6ed589ef897f044ca87de3a38f828983, type: 2}
   - {fileID: 11400000, guid: 98e1b451738204522b9a2c2cca69aa9d, type: 2}
   - {fileID: 11400000, guid: 3f9f0f416eacaa2498537aac6c0ad555, type: 2}
+  - {fileID: 11400000, guid: 0011e98b7e31b4f46aef05b539a8b3d4, type: 2}

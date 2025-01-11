@@ -2,6 +2,7 @@ using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using System.Linq;
 
 public class GridHandler : MonoBehaviour
 {
@@ -70,8 +71,9 @@ public class GridHandler : MonoBehaviour
 
                     //STORE BUILDABLE IN PLACED BUILDABLES
                     PlacementHandler.instance.allPlacedBuildables.Add(randomNatureBuildable);
+                    
                     //Update stats
-                    StatsHandler.instance.UpdateStats(randomNatureBuildable);
+                    //StatsHandler.instance.UpdateStats(randomNatureBuildable);
 
                     continue;
                 }
@@ -82,7 +84,7 @@ public class GridHandler : MonoBehaviour
 
         }
 
-        //ASSIGNING NEIGHBORS
+        //ASSIGNING NEIGHBORS - USED IN GetConnections()
         foreach(var cell in gridCells) {
             Vector2 cellPos = cell.Key;
             GridTile cellTile = cell.Value;
@@ -92,6 +94,43 @@ public class GridHandler : MonoBehaviour
             }
         }
 
+        //-----------------------EXTRA-----------------------
+
+        //CREATE THE STARTING TWO HOUSES
+        List<GridTile> tilesWithoutBuildables = GetUnoccupiedTiles();
+        //scramble the tiles without buildables
+        tilesWithoutBuildables = tilesWithoutBuildables.OrderBy(x => Random.value).ToList();
+        //keep track of available spots for the houses
+        (GridTile, GridTile)? availableSpots = null;
+        //attempt to find available spots
+        foreach(GridTile tile in tilesWithoutBuildables) {
+            List<GridTile> unoccupiedNeighbors = tile.neighbors.Where(x => tilesWithoutBuildables.Contains(x)).ToList();
+            if(unoccupiedNeighbors.Count != 0) {
+                GridTile randomHouse1 = tile;
+                GridTile randomHouse2 = unoccupiedNeighbors[Random.Range(0, unoccupiedNeighbors.Count)];
+
+                availableSpots = new (randomHouse1, randomHouse2);
+
+                break;
+            }
+        } 
+        //spawn two houses if there are available spots - there should always be atleast 2 available spots
+        if(availableSpots != null) {
+            Buildable houseBuildable = Resources.Load<Buildable>("Buildables/Tent");
+            PlacementHandler.instance.AddBuildable(houseBuildable, PlacementHandler.instance.rotations[1], availableSpots.Value.Item1);
+            PlacementHandler.instance.AddBuildable(houseBuildable, PlacementHandler.instance.rotations[0], availableSpots.Value.Item2);
+        }
+
+        //ASSIGN CONNECTIONS IF ANY (primarily for connecting forests to make jungles)
+        //loop through all the tiles that started with a buildable
+        List<GridTile> tilesWithBuildables = gridCells.Values.Where(x => x != null && x.currentBuildable != null).ToList();
+        foreach(GridTile tile in tilesWithBuildables) {
+            ConnectionsHandler.instance.TryAddConnections(tile);
+        }
+
+        //-----------------------START GAME-----------------------
+        //makes sure that map is created before game 'actually' starts
+        StartCoroutine(GameHandler.instance.StartGame());
     }
 
     private GridTile CreateGridCell(Vector3 pos, Vector2 gridPos) {
@@ -184,6 +223,10 @@ public class GridHandler : MonoBehaviour
         float falloff = Mathf.Clamp01(1f - distance); 
 
         return falloff;
+    }
+
+    public List<GridTile> GetUnoccupiedTiles() {
+        return gridCells.Values.Where(x => x != null && x.currentBuildable == null).ToList();
     }
 }
 
