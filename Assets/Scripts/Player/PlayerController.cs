@@ -12,12 +12,15 @@ public class PlayerController : MonoBehaviour
     public int bounds;
 
     private Vector2 moveVector;
+    private int mapSize;
 
     [HideInInspector] public bool zoomed;
     private Vector3 originalZoomPos;
 
     private void Awake() {
         instance = this;
+
+        mapSize = (int)GridHandler.instance.size.x;
     }
 
     void Update()
@@ -35,7 +38,7 @@ public class PlayerController : MonoBehaviour
         transform.Translate(movement, Space.World);
 
         //boundaries
-        float clampedX = Mathf.Clamp(transform.position.x, -bounds, bounds);
+        float clampedX = Mathf.Clamp(transform.position.x, -bounds + mapSize, bounds + mapSize);
         float clampedZ = Mathf.Clamp(transform.position.z, -bounds, bounds);
         transform.position = new Vector3(clampedX, transform.position.y, clampedZ);
     }

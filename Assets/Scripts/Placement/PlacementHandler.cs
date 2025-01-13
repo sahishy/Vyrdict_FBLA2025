@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class PlacementHandler : MonoBehaviour, Animatable
@@ -220,14 +218,14 @@ public class PlacementHandler : MonoBehaviour, Animatable
             //---show tile buildable if it was hidden while UPGRADING---
             if(currentTile != null) {
                 if(currentTile.currentBuildableObject != null) {
-                    currentTile.currentBuildableObject?.SetActive(true);
+                    currentTile.currentBuildableObject.SetActive(true);
                 }
             }
 
             //CHECK IF PLAYER CAN PLACE BUILDABLE
             if(CanPlaceBuildable(gridTile)) {
 
-                bool isUpgrade = GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable;
+                bool isUpgrade = gridTile.currentBuildable != null && GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable;
 
                 //change color of highlight based on whether placement is an upgrade or normal placement
                 Material targetMaterial = isUpgrade ? positiveHighlightMaterial : highlightMaterial;
@@ -269,7 +267,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
             //connectionMeshRenderers.Clear();
 
             //highlight all of the tiles that this tile can connect to, make sure tile isn't occupied before showing the effect
-            bool showConnections = gridTile.currentBuildable != null ? GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable : true;
+            bool showConnections = gridTile.currentBuildable == null || GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable;
             if(showConnections) {
                 //get all the tiles of the possible connections the tile can have
                 Dictionary<Connection, List<GridTile>> connectionTiles = ConnectionsHandler.instance.GetConnectionTilesFromTileBuildable(gridTile, currentBuildable);
@@ -331,7 +329,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
         
         return unoccupiedTileAndNoUpgrade || occupiedTileAndUpgrade;
     }
-    //returns a buildables previous upgrade (ex. big house -> small house)
+    //returns a buildables previous upgrade (ex. big house -> small house, rock -> null)
     private Buildable GetPreviousUpgrade(Buildable buildable) {
         return Resources.LoadAll<Buildable>("Buildables").FirstOrDefault(x => x.upgrade != null && x.upgrade.name == buildable.name);
     }

@@ -113,7 +113,7 @@ public class GameHandler : MonoBehaviour, Animatable
         }
 
         //GAME LOOP - create random housing every 3 days
-        if(Random.Range(0f, 100f) > housingSpawnChance) {
+        if(housingSpawnChance > Random.Range(0, 100)) {
             housingSpawnChance = 1;
             SpawnHousing();
         } else {

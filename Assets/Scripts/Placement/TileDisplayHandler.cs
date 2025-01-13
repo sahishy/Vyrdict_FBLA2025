@@ -33,6 +33,16 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
             return;
         }
 
+        //end all current UI animations
+        DOTween.Kill(displayPanel);
+        displayPanel.anchoredPosition = new Vector2(0, 40);
+        panelToggling = false;
+
+        //hide the old tile outline
+        if(displayedTile != null) {
+            displayedTile.ToggleFocusDisplay(false);
+        }
+
         //store tile
         displayedTile = tile;
 
@@ -56,7 +66,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
             display.SetActive(true);
             displayPanel.DOAnchorPos(new Vector2(0, 40), 0.5f).SetEase(Ease.OutBack).OnComplete(() => {
                 panelToggling = false;
-            });
+            }).SetId(displayPanel);
         }
 
         StartCoroutine(RefreshContentSizeFitter());
@@ -68,6 +78,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         
         Debug.Log("Display Hidden");
 
+        //hide the old tile outline
         displayedTile.ToggleFocusDisplay(false);
 
         //hide connections
