@@ -91,7 +91,7 @@ public class DecisionHandler : MonoBehaviour
         }
 
         //unfocus any animatable
-        GameHandler.instance.currentFocusedAnimatable.AnimatableExit();
+        GameHandler.instance.currentFocusedAnimatable?.AnimatableExit();
 
         //closing animation
         decisionScreen.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() => {
@@ -131,19 +131,19 @@ public class DecisionHandler : MonoBehaviour
             float score = 0;
 
             // Prioritize decisions that address deficits
-            if (StatsHandler.instance.environment < 50) score += environmentEffect * 1.5f;
+            if (StatsHandler.instance.GetStat(Stat.Environment) < 50) score += environmentEffect * 1.5f;
             else score += environmentEffect;
 
-            if (StatsHandler.instance.happiness < 50) score += happinessEffect * 1.5f;
+            if (StatsHandler.instance.GetStat(Stat.Happiness) < 50) score += happinessEffect * 1.5f;
             else score += happinessEffect;
 
-            if (StatsHandler.instance.economy < 50) score += economyEffect * 1.5f;
+            if (StatsHandler.instance.GetStat(Stat.Economy) < 50) score += economyEffect * 1.5f;
             else score += economyEffect;
 
             // Avoid decisions that worsen stats already in deficit
-            if (StatsHandler.instance.environment < 50 && environmentEffect < 0) score -= Mathf.Abs(environmentEffect) * 2;
-            if (StatsHandler.instance.happiness < 50 && happinessEffect < 0) score -= Mathf.Abs(happinessEffect) * 2;
-            if (StatsHandler.instance.economy < 50 && economyEffect < 0) score -= Mathf.Abs(economyEffect) * 2;
+            if (StatsHandler.instance.GetStat(Stat.Environment) < 50 && environmentEffect < 0) score -= Mathf.Abs(environmentEffect) * 2;
+            if (StatsHandler.instance.GetStat(Stat.Happiness) < 50 && happinessEffect < 0) score -= Mathf.Abs(happinessEffect) * 2;
+            if (StatsHandler.instance.GetStat(Stat.Economy) < 50 && economyEffect < 0) score -= Mathf.Abs(economyEffect) * 2;
 
             // Add the score to the dictionary
             decisionScores.Add(decision, score);
@@ -186,28 +186,28 @@ public class DecisionHandler : MonoBehaviour
         float randomHappinessAnimationTime = animationTime + Random.Range(0f, 1f);
         float randomEconomyAnimationTime = animationTime + Random.Range(0f, 1f);
 
-        environmentBar.DOFillAmount(StatsHandler.instance.environment / 100f, randomEnvironmentAnimationTime).SetEase(Ease.OutExpo);
-        happinessBar.DOFillAmount(StatsHandler.instance.happiness / 100f, randomHappinessAnimationTime).SetEase(Ease.OutExpo);
-        economyBar.DOFillAmount(StatsHandler.instance.economy / 100f, randomEconomyAnimationTime).SetEase(Ease.OutExpo);
+        environmentBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Environment) / 100f, randomEnvironmentAnimationTime).SetEase(Ease.OutExpo);
+        happinessBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Happiness) / 100f, randomHappinessAnimationTime).SetEase(Ease.OutExpo);
+        economyBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Economy) / 100f, randomEconomyAnimationTime).SetEase(Ease.OutExpo);
 
         //show raw stat values, do counting animation
         float _environmentValue = 0f;
         float _happinessValue = 0f;
         float _economyValue = 0f;
 
-        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.environment, randomEnvironmentAnimationTime)
+        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Environment), randomEnvironmentAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => environmentText.text = Mathf.RoundToInt(_environmentValue).ToString());
-        DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.happiness, randomHappinessAnimationTime)
+        DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.GetStat(Stat.Happiness), randomHappinessAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => happinessText.text = Mathf.RoundToInt(_happinessValue).ToString());
-        DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.economy, randomEconomyAnimationTime)
+        DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.GetStat(Stat.Economy), randomEconomyAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => economyText.text = Mathf.RoundToInt(_economyValue).ToString());
 
         yield return new WaitForSeconds(3f);
 
         //show status color of raw stats (red bad, white neutral, green good)
-        environmentText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.environment), 1f);
-        happinessText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.happiness), 1f);
-        economyText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.economy), 1f);
+        environmentText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Environment)), 1f);
+        happinessText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Happiness)), 1f);
+        economyText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Economy)), 1f);
 
         //give extra time to look at stats
         yield return new WaitForSeconds(2f);

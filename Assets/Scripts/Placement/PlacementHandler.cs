@@ -10,7 +10,6 @@ public class PlacementHandler : MonoBehaviour, Animatable
     public static PlacementHandler instance;
 
     [Header("Placement")]
-    public List<Buildable> allPlacedBuildables = new List<Buildable>();
     [HideInInspector] public bool inPlacementMode = false;
     private Buildable currentBuildable;
     [HideInInspector] public GameObject currentGhost;
@@ -103,7 +102,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
             //makes sure buildable can be placed
             if(CanPlaceBuildable(gridTile)) {
                 
-                bool isUpgrade = GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable;
+                bool isUpgrade = gridTile.currentBuildable != null && GetPreviousUpgrade(currentBuildable) == gridTile.currentBuildable;
 
                 //-----------BUILDABLE GAMEPLAY LOGIC-----------
                 AddBuildable(currentBuildable, currentRotation, gridTile);
@@ -120,12 +119,22 @@ public class PlacementHandler : MonoBehaviour, Animatable
 
                 //Dictionary<Connection, List<GridTile>> connections = ConnectionsHandler.instance.GetConnections(gridTile);
                 
-                //CHECK IF PLACEMENT WAS AN UPGRADE, IF SO THEN 'REFRESH' THE CONNECTION GROUPS, IF NOT THEN TREAT NORMALLY
+                //CHECK IF PLACEMENT WAS AN UPGRADE
                 if(isUpgrade) {
+                    //refresh connection groups if upgrade
                     ConnectionsHandler.instance.UpdateConnectionGroupsWithTile(gridTile);
                 } else {
+                    //not an upgrade
+
+                    //try to add or merge connections
                     ConnectionsHandler.instance.TryAddConnections(gridTile);
+
+                    //try to add or merge communities
+                    CommunitiesHandler.instance.TryAddCommunities(gridTile);
                 }
+
+                //-----------FACTOR LOGIC-----------
+                FactorsHandler.instance.UpdateFactors();
 
                 //-----------INVENTORY LOGIC-----------
                 //Remove item from inventory
@@ -148,8 +157,6 @@ public class PlacementHandler : MonoBehaviour, Animatable
   
     }
     public void AddBuildable(Buildable buildable, Vector3 rotation, GridTile tile) {
-        //Store buildable in list
-        allPlacedBuildables.Add(buildable);
 
         //Update stats
         //StatsHandler.instance.UpdateStats(currentBuildable);
@@ -157,13 +164,18 @@ public class PlacementHandler : MonoBehaviour, Animatable
         //Add buildable to tile
         tile.AddBuildable(buildable, rotation);
     }
+    public List<PlacedBuildable> GetPlacedBuildables() {
+        List<PlacedBuildable> temp = new List<PlacedBuildable>();
+        foreach(GridTile tile in GridHandler.instance.GetOccupiedTiles()) {
+            temp.Add(new PlacedBuildable(tile.currentBuildable, tile));
+        }
+        return temp;
+    }
     public void RemoveBuildable(GridTile tile) {
-        //Remove buildable from list
-        allPlacedBuildables.Remove(tile.currentBuildable);
         //Update stats
         StatsHandler.instance.UpdateStats();
         //Remove buildable from tile
-        tile.RemoveBuildable();
+        tile.RemoveBuildable();            
     }
 
     private void PlacementMode() {
@@ -317,7 +329,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
     }
     //returns the count of a certain buildable
     public int GetPlacedBuildableCount(string name) {
-        return allPlacedBuildables.Where(x => x.name == name).Count();
+        return GetPlacedBuildables().Where(x => x.buildable.name == name).Count();
     }
     //returns whether a buildable can be placed on a tile
     private bool CanPlaceBuildable(GridTile tile) {
@@ -374,5 +386,15 @@ public class PlacementHandler : MonoBehaviour, Animatable
         yield return new WaitForSeconds(1f);
         placeButtonFocusHolder.GetChild(2).GetComponent<RectTransform>().DOSizeDelta(Vector2.one * 80, 2f).SetLoops(-1, LoopType.Restart);
         placeButtonFocusHolder.GetChild(2).GetComponent<Image>().DOFade(0, 2f).SetLoops(-1, LoopType.Restart);
+    }
+}
+
+public class PlacedBuildable {
+    public Buildable buildable;
+    public GridTile tile;
+
+    public PlacedBuildable(Buildable buildable, GridTile tile) {
+        this.buildable = buildable;
+        this.tile = tile;
     }
 }

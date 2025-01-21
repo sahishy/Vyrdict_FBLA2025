@@ -10,10 +10,14 @@ public class StatsHandler : MonoBehaviour
 {
     public static StatsHandler instance;
 
-    [Header("Stats")]
+    [Header("Stats - Main")]
     public int economy = 100;
     public int happiness = 100;
     public int environment = 100;
+    [Header("Stats - Misc")]
+    public int population = 0;
+    public int requiredPopulation = 0;
+
     [Header("References")]
     [SerializeField] private Image environmentBar;
     [SerializeField] private Image happinessBar;
@@ -45,6 +49,10 @@ public class StatsHandler : MonoBehaviour
         UpdateUI();
     }
 
+    //Sets the main stats to random values at the start of the game
+    //---Environment starts off high, as there is barely any pollution when the island is just made
+    //---Happiness starts off low, as the community has been sad for a while
+    //---Economy starts off low, as there is barely any economic activity
     private void SetStartingStats() {
         Vector2Int randomEnvironmentRange = new Vector2Int(90, 98);
         Vector2Int randomHappinessRange = new Vector2Int(35, 45);
@@ -55,16 +63,25 @@ public class StatsHandler : MonoBehaviour
         economy = Random.Range(randomEconomyRange.x, randomEconomyRange.y);
     }
 
+    //-------------------------------------------------STATS-------------------------------------------------
+
+    //Handles updating all stats, is called at the end of every day and when a buildable is removed
     public void UpdateStats() {
+        //MAIN STATS
+
         int unclampedEnvironment = environment;
         int unclampedHappiness = happiness;
         int unclampedEconomy = economy;
 
-        foreach(Buildable buildable in PlacementHandler.instance.allPlacedBuildables) {
-            unclampedEnvironment += buildable.environmentEffect;
-            unclampedHappiness += buildable.happinessEffect;
-            unclampedEconomy += buildable.economyEffect;
+        foreach(PlacedBuildable placedBuildable in PlacementHandler.instance.GetPlacedBuildables()) {
+
+            (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
+
+            unclampedEnvironment += buildableStatEffects.Item1;
+            unclampedHappiness += buildableStatEffects.Item2;
+            unclampedEconomy += buildableStatEffects.Item3;
         }
+
         foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
             unclampedEnvironment += connectionGroup.connection.environmentEffect;
             unclampedHappiness += connectionGroup.connection.happinessEffect;
@@ -75,8 +92,100 @@ public class StatsHandler : MonoBehaviour
         happiness = Mathf.Clamp(unclampedHappiness, 0, 100);
         economy = Mathf.Clamp(unclampedEconomy, 0, 100);
 
+        //MISC STATS
+
+        foreach(Community community in CommunitiesHandler.instance.allCommunities) {
+
+            int communityPopulation = 0;
+            int communityRequiredPopulation = 0;
+
+            foreach(Buildable buildable in community.tiles.ConvertAll(x => x.currentBuildable)) {
+                
+                if(buildable.buildableFocus == Stat.Happiness) {
+                    communityPopulation += buildable.residents;
+                } else if(buildable.buildableFocus == Stat.Economy) {
+                    communityRequiredPopulation += buildable.requiredCustomers;
+                }
+
+            }
+
+            community.population = communityPopulation;
+            community.requiredPopulation = communityRequiredPopulation;
+        }
+
+        population = CommunitiesHandler.instance.allCommunities.ConvertAll(x => x.population).Sum();
+        requiredPopulation = CommunitiesHandler.instance.allCommunities.ConvertAll(x => x.requiredPopulation).Sum();
+
+        //update factors in case new stats completed any
+        FactorsHandler.instance.UpdateFactors();
+
+        //update UI to accurately display stats
         UpdateUI();
     }
+
+    //Returns the stat effects of a buildable based on various factors
+    public (int, int, int) GetBuildableStats(Buildable buildable, GridTile tile) {
+        int environmentEffect = 0;
+        int happinessEffect = 0;
+        int economyEffect = 0;
+
+        //Check if the buildable has a required connection
+        if(buildable.requiredConnection != null) {
+            
+            bool requiredConnectionMet = ConnectionsHandler.instance.RequiredConnectionMet(tile);
+            int effectModifier = requiredConnectionMet ? 1 : -1;
+
+            //Change stat based on whether required connection is met or not
+            switch(buildable.buildableFocus) {
+            
+                case Stat.Environment:
+                    environmentEffect += buildable.environmentEffect * effectModifier;
+                    happinessEffect = buildable.happinessEffect;
+                    economyEffect = buildable.economyEffect;
+                    break;
+                
+                case Stat.Happiness:
+                    environmentEffect = buildable.environmentEffect;
+                    happinessEffect += buildable.happinessEffect * effectModifier;
+                    economyEffect = buildable.economyEffect;
+                    break;
+                
+                case Stat.Economy:
+                    environmentEffect = buildable.environmentEffect;
+                    happinessEffect = buildable.happinessEffect;
+                    economyEffect += buildable.economyEffect * effectModifier;
+                    break;
+                
+            }
+
+        }
+
+        //If the buildable is economic, change its economic output based on a formula which considers population
+        //  ( (community's population) / (community's required population) ) * (multiplier)
+        if(buildable.buildableFocus == Stat.Economy) {
+            Community community = CommunitiesHandler.instance.GetCommunity(tile);
+
+            int population;
+            int requiredPopulation;
+
+            if(community != null) {
+                population = community.population;
+                requiredPopulation = community.requiredPopulation;
+            } else {
+                population = 0;
+                requiredPopulation = buildable.requiredCustomers;
+            }
+
+            float multiplier = 1f;
+            int economicOutput = Mathf.FloorToInt(population / requiredPopulation * multiplier);
+            
+            economyEffect += economicOutput;
+        }
+
+        return (environmentEffect, happinessEffect, economyEffect);
+    }
+
+    //Method for changing a stat directly
     public void ChangeStat(Stat stat, int amount) {
         if(stat == Stat.Environment) {
             environment += amount;
@@ -87,6 +196,8 @@ public class StatsHandler : MonoBehaviour
         }
         UpdateUI();
     }
+
+    //-------------------------------------------------UI-------------------------------------------------
 
     private void UpdateUI() {
         float maxStatAmount = 100f;
@@ -171,6 +282,18 @@ public class StatsHandler : MonoBehaviour
         }
     }
 
+    //-------------------------------------------------UTILITY-------------------------------------------------
+
+    public int GetStat(Stat stat) {
+        if(stat == Stat.Environment) {
+            return environment;
+        } else if(stat == Stat.Happiness) {
+            return happiness;
+        } else if(stat == Stat.Economy) {
+            return economy;
+        }
+        return 0;
+    }
     public bool AnyStatZero() {
         return economy <= 0 || happiness <= 0 || environment <= 0;
     }
@@ -228,40 +351,27 @@ public class StatsHandler : MonoBehaviour
         return gradient.Evaluate(normalizedValue);
     }
     private Dictionary<string, int> GetStatBuildableEffects(Stat stat) {
-        //key: buildable name, value: (number of buildable, effect on stat)
+        //key: buildable name, value: effect on stat
         Dictionary<string, int> effects = new Dictionary<string, int>();
 
-        if(stat == Stat.Environment) {
-            foreach(Buildable buildable in PlacementHandler.instance.allPlacedBuildables) {
-                if(effects.ContainsKey(buildable.name)) {
-                    continue;
-                }
+        foreach(PlacedBuildable placedBuildable in PlacementHandler.instance.GetPlacedBuildables()) {
 
-                if(buildable.environmentEffect != 0) {
-                    int sameBuildableCount = PlacementHandler.instance.GetPlacedBuildableCount(buildable.name);
-                    effects.Add(buildable.name, buildable.environmentEffect * sameBuildableCount);
-                }
+            (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
+
+            int focusedStatValue = 0;
+            if(stat == Stat.Environment) {
+                focusedStatValue = buildableStatEffects.Item1;                
+            } else if(stat == Stat.Happiness) {
+                focusedStatValue = buildableStatEffects.Item2;
+            } else if(stat == Stat.Economy) {
+                focusedStatValue = buildableStatEffects.Item3;
             }
-        } else if(stat == Stat.Happiness) {
-            foreach(Buildable buildable in PlacementHandler.instance.allPlacedBuildables) {
-                if(effects.ContainsKey(buildable.name)) {
-                    continue;
-                }
 
-                if(buildable.happinessEffect != 0) {
-                    int sameBuildableCount = PlacementHandler.instance.GetPlacedBuildableCount(buildable.name);
-                    effects.Add(buildable.name, buildable.happinessEffect * sameBuildableCount);
-                }
-            }
-        } else if(stat == Stat.Economy) {
-            foreach(Buildable buildable in PlacementHandler.instance.allPlacedBuildables) {
-                if(effects.ContainsKey(buildable.name)) {
-                    continue;
-                }
-
-                if(buildable.economyEffect != 0) {
-                    int sameBuildableCount = PlacementHandler.instance.GetPlacedBuildableCount(buildable.name);
-                    effects.Add(buildable.name, buildable.economyEffect * sameBuildableCount);
+            if(focusedStatValue != 0) {
+                if(effects.ContainsKey(placedBuildable.buildable.name)) {
+                    effects[placedBuildable.buildable.name] += focusedStatValue;
+                } else {
+                    effects.Add(placedBuildable.buildable.name, focusedStatValue);                    
                 }
             }
         }
@@ -271,8 +381,9 @@ public class StatsHandler : MonoBehaviour
 
         return effects;
     }
+
     private Dictionary<string, int> GetStatConnectionEffects(Stat stat) {
-        //key: connection name, value: (number of connection, effect on stat)
+        //key: connection name, value: effect on stat
         Dictionary<string, int> effects = new Dictionary<string, int>();
 
         if(stat == Stat.Environment) {
@@ -322,7 +433,7 @@ public class StatsHandler : MonoBehaviour
         return effects;
     }
     private Dictionary<string, int> GetStatFactorEffects(Stat stat) {
-        //key: connection name, value: (number of connection, effect on stat)
+        //key: connection name, value: effect on stat
         Dictionary<string, int> effects = new Dictionary<string, int>();
 
         foreach(Factor factor in FactorsHandler.instance.factors.Keys) {

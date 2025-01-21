@@ -51,8 +51,10 @@ public class GridTile : MonoBehaviour, Interactable
 
     public void AddBuildable(Buildable buildable, Vector3 rotation) {
         //DELETE ANY EXISTING BUILDABLE IF ANY
-        PlacementHandler.instance.RemoveBuildable(this);
-        RemoveBuildable();
+        if(currentBuildable != null) {
+            PlacementHandler.instance.RemoveBuildable(this);
+            RemoveBuildable();            
+        }
 
         //CREATE NEW BUILDABLE
         currentBuildable = buildable;

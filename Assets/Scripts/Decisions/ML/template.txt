@@ -1,0 +1,75 @@
+You will create a short ethical dilemma for a player managing an island-based community in a strategy game. 
+The game is about survival and decision-making, where players must balance three main stats:
+- Environment (Impact on nature and sustainability)
+- Happiness (Well-being and satisfaction of citizens)
+- Economy (Financial stability and economic growth)
+
+Game Content:
+- The player must **survive as long as possible** while facing **weekly ethical dilemmas**.
+- If **any stat reaches 0, they lose**.
+- Players can **build and upgrade structures**, each with **unique effects on the three main stats**.
+- The game includes only the following buildings:
+
+**Valid Buildings:**  
+Blacksmith, Blacksmith Blueprint, Booth, Church, Church Blueprint, Farm, Hill, House,  
+Lumbermill, Lumbermill Blueprint, Manor, Market, Market Blueprint, Mine,  
+Rock, Tavern, Tavern Blueprint, Tent, Well, Windmill, Windmill Blueprint  
+
+**Valid Upgrades:**
+Blacksmith Blueprint upgrades into Blacksmith
+Booth upgrades into Market Blueprint
+Church Blueprint upgrades into Church
+Hill upgrades into Mine
+House upgrades into Manor
+Lumbermill Blueprint upgrades into Lumbermill
+Market Blueprint upgrades into Market
+Rock upgrades into Hill
+Tavern Blueprint upgrades into Tavern
+Tent upgrades into House
+Windmill Blueprint upgrades into Windmill
+
+**IMPORTANT RULES:**  
+1. **NEVER invent buildings that are not in the list above.**  
+2. **For buildables that have a previous upgrade, ONLY offer it if the previous upgrade is stored in placedBuildables in gameData.**
+3. **EVERY response MUST follow this JSON format strictly.**  
+4. **EVERY response MUST have three choices.**
+5. **Each choice MUST have 2 affected stats (one increase, one decrease).**  
+6. **Each choice MUST provide a valid building as a reward.**  
+8. **At the end of your response, add: `"valid": true` to confirm you followed these 8 rules and all other instructions.**  
+
+**Current Situation (Data from the player’s island)**  
+{gameData}
+
+---
+
+**STRICT JSON RESPONSE FORMAT:**
+```json
+{{
+    "Scenario": "A short yet informative, 2nd person description of an ethical dilemma based on the game stats.",
+    "Choices": {{
+        "1": {{
+            "description": "Choice 1 description (String only, no extra text)",
+            "stat1": "Environment | Happiness | Economy",
+            "effect1": (Integer, positive or negative),
+            "stat2": "Environment | Happiness | Economy",
+            "effect2": (Integer, positive or negative),
+            "buildable": "A valid building name from the list above"
+        }},
+        "2": {{
+            "description": "Choice 2 description",
+            "stat1": "Environment | Happiness | Economy",
+            "effect1": (Integer, positive or negative),
+            "stat2": "Environment | Happiness | Economy",
+            "effect2": (Integer, positive or negative),
+            "buildable": "A valid building name from the list above"
+        }},
+        "3": {{
+            "description": "Choice 3 description",
+            "stat1": "Environment | Happiness | Economy",
+            "effect1": (Integer, positive or negative),
+            "stat2": "Environment | Happiness | Economy",
+            "effect2": (Integer, positive or negative),
+            "buildable": "A valid building name from the list above"
+        }}
+    }}
+}}

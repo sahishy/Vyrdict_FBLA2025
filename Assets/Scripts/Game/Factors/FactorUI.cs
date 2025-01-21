@@ -10,6 +10,9 @@ public class FactorUI : MonoBehaviour, Animatable
     private float factorLength;
     private float startingTime;
     private bool destroying;
+
+    //Requirements
+    [HideInInspector] public int startingBuildableCount;
     
     [Header("References")]
     [SerializeField] private Image factorBar;
@@ -38,7 +41,7 @@ public class FactorUI : MonoBehaviour, Animatable
         if(factor.factorType == FactorType.Event) {
             factorDescription.text = factor.description;
         } else {
-            factorDescription.text = $"{factor.description}{(factor.requirement == FactorRequirement.Buildable ? $" Build a {factor.requiredBuildable.name}" : $" Reach {factor.requiredStatValue} {factor.requiredStat}")}{(factor.length != -1f ? $" by {((GameHandler.instance.currentDay + factor.length) % 7 == 0 ? $"week {(GameHandler.instance.currentDay + factor.length) / 7}" : $"day {GameHandler.instance.currentDay + factor.length}")}" : "")}.";
+            factorDescription.text = GetDescription();
         }
         factorType.text = factor.factorType.ToString();
 
@@ -52,21 +55,62 @@ public class FactorUI : MonoBehaviour, Animatable
             factorRewardHolder.SetActive(true);
             factorReward.text = factor.reward == FactorReward.Buildable ? $"1x {factor.buildableReward.name}" : $"{StatsHandler.instance.ConvertToEffectValue(factor.statRewardValue)} {factor.statReward}";
         }
+
+        //Requirements
+        if(factor.factorType == FactorType.Demand || factor.factorType == FactorType.Quest) {
+            if(factor.requirement == FactorRequirement.Buildable) {
+                startingBuildableCount = PlacementHandler.instance.GetPlacedBuildableCount(factor.requiredBuildable.name);
+            }
+        }
+
+        transform.DOScale(1f, 0.5f).SetEase(Ease.InBack);
     }
     
     private void Update() {
+
         if(factor != null) {
+
+            //End factor after max time
             factorBar.fillAmount = (factorLength - (GameHandler.instance.timer - startingTime)) / factorLength;
 
             if(factorBar.fillAmount == 0 && !destroying) {
-                destroying = true;
                 DestroyFactor();
             }
+            
         }
+
         //factorBar.color = new Color32(255, 255, 255, (byte)(GameHandler.instance.timeFrozen || GameHandler.instance.timeScale == 0 ? 128 : 255));
     }
 
-    private void DestroyFactor() {
+    private string GetDescription() {
+        string description = factor.description;
+
+        if(factor.factorType != FactorType.Event) {
+
+            int finalDay = GameHandler.instance.currentDay + factor.length;
+            string finalDate = finalDay % 7 == 0 ? $"Week {finalDay / 7}" : $"Day {finalDay}";
+
+            if(factor.requirement == FactorRequirement.Stat) {
+
+                description += $" Reach {factor.requiredStatValue} {factor.requiredStat} by {finalDate}.";
+
+            } else if(factor.requirement == FactorRequirement.Buildable) {
+
+                string buildableCount = factor.requiredBuildableCount == 1 ? $"a {factor.requiredBuildable.name}"
+                : $"{factor.requiredBuildableCount} {factor.requiredBuildable.name}s";
+
+                description += $" Build {buildableCount} by {finalDate}.";
+
+            }
+
+        }
+
+        return description;
+    }
+
+    public void DestroyFactor() {
+        destroying = true;
+
         FactorsHandler.instance.RemoveFactor(this);
         
         if((object)GameHandler.instance.currentFocusedAnimatable == this) {

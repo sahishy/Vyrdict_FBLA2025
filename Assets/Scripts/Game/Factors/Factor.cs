@@ -14,6 +14,7 @@ public class Factor : ScriptableObject
     //demand & quest
     [SerializeField] private FactorRequirement _requirement;
     [SerializeField] private Buildable _requiredBuildable;
+    [SerializeField] private int _requiredBuildableCount;
     [SerializeField] private Stat _requiredStat;
     [SerializeField] private int _requiredStatValue;
 
@@ -32,6 +33,7 @@ public class Factor : ScriptableObject
     public FactorRequirement requirement { get => _requirement; set => _requirement = value; }
     public FactorReward reward { get => _reward; set => _reward = value; }
     public Buildable requiredBuildable { get => _requiredBuildable; set => _requiredBuildable = value; }
+    public int requiredBuildableCount { get => _requiredBuildableCount; set => _requiredBuildableCount = value; }
     public Stat requiredStat { get => _requiredStat; set => _requiredStat = value; }
     public int requiredStatValue { get => _requiredStatValue; set => _requiredStatValue = value; }
     public Buildable buildableReward { get => _buildableReward; set => _buildableReward = value; }
@@ -85,6 +87,7 @@ public class FactorEditor : Editor
             script.requirement = (FactorRequirement)EditorGUILayout.EnumPopup($"{script.factorType} Requirement", script.requirement);
             if(script.requirement == FactorRequirement.Buildable) {
                 script.requiredBuildable = (Buildable)EditorGUILayout.ObjectField("Buildable", script.requiredBuildable, typeof(Buildable), false);
+                script.requiredBuildableCount = EditorGUILayout.IntField("Count", script.requiredBuildableCount);
             } else if(script.requirement == FactorRequirement.Stat) {
                 script.requiredStat = (Stat)EditorGUILayout.EnumPopup("Stat", script.requiredStat);
                 script.requiredStatValue = EditorGUILayout.IntField("Value", script.requiredStatValue);

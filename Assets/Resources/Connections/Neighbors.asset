@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Neighbors
   m_EditorClassIdentifier: 
   environmentEffect: 0
-  happinessEffect: 1
+  happinessEffect: 0
   economyEffect: 0
   rootBuildables:
   - {fileID: 11400000, guid: 98e1b451738204522b9a2c2cca69aa9d, type: 2}

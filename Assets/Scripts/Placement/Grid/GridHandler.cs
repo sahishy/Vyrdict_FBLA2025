@@ -1,7 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using System.Linq;
 
 public class GridHandler : MonoBehaviour
@@ -68,9 +67,6 @@ public class GridHandler : MonoBehaviour
                     Buildable randomNatureBuildable = natureBuildables[Random.Range(0, natureBuildables.Count)];
 
                     gridTile.Initialize(randomNatureBuildable);
-
-                    //STORE BUILDABLE IN PLACED BUILDABLES
-                    PlacementHandler.instance.allPlacedBuildables.Add(randomNatureBuildable);
                     
                     //Update stats
                     //StatsHandler.instance.UpdateStats(randomNatureBuildable);
@@ -121,11 +117,17 @@ public class GridHandler : MonoBehaviour
             PlacementHandler.instance.AddBuildable(houseBuildable, PlacementHandler.instance.rotations[0], availableSpots.Value.Item2);
         }
 
-        //ASSIGN CONNECTIONS IF ANY (primarily for connecting forests to make jungles)
+        //ASSIGN CONNECTIONS IF ANY (primarily for the two tents)
         //loop through all the tiles that started with a buildable
         List<GridTile> tilesWithBuildables = gridCells.Values.Where(x => x != null && x.currentBuildable != null).ToList();
         foreach(GridTile tile in tilesWithBuildables) {
             ConnectionsHandler.instance.TryAddConnections(tile);
+        }
+
+        //ASSIGN COMMUNITIES IF ANY (primarily for the two tents)
+        //try to add or merge communities
+        foreach(GridTile tile in tilesWithBuildables) {
+            CommunitiesHandler.instance.TryAddCommunities(tile);
         }
 
         //-----------------------START GAME-----------------------
@@ -227,6 +229,19 @@ public class GridHandler : MonoBehaviour
 
     public List<GridTile> GetUnoccupiedTiles() {
         return gridCells.Values.Where(x => x != null && x.currentBuildable == null).ToList();
+    }
+    public List<GridTile> GetOccupiedTiles() {
+        return gridCells.Values.Where(x => x != null && x.currentBuildable != null).ToList();
+    }
+
+    public Vector3 GetAverageTileListPosition(List<GridTile> tiles) {
+        List<Vector3> tilePositions = tiles.ConvertAll(tile => tile.transform.position);
+        Vector3 averagePosition = new Vector3(
+            tilePositions.Average(pos => pos.x),
+            tilePositions.Average(pos => pos.y),
+            tilePositions.Average(pos => pos.z)
+        );
+        return averagePosition;
     }
 }
 

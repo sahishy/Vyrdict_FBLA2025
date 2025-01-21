@@ -20,5 +20,15 @@ MonoBehaviour:
   _environmentEffect: -2
   _happinessEffect: 2
   _economyEffect: 0
+  _buildableFocus: 2
+  _requiredConnection: {fileID: 11400000, guid: 7a85583304ebb4fee87c36035ba1d566, type: 2}
+  _positiveRequiredConnectionStatusText: The residents are happy.
+  _negativeRequiredConnectionStatusText: The residents are lonely.
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 2
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 98e1b451738204522b9a2c2cca69aa9d, type: 2}
   _tile: {fileID: 7379618341076902164, guid: 9baa63e094e5365408a6af39a75da40d, type: 3}

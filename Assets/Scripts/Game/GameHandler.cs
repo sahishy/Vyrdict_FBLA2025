@@ -15,9 +15,6 @@ public class GameHandler : MonoBehaviour, Animatable
     public int currentDay = 0;
     public int currentWeek = 0;
 
-    [Header("Factors")]
-    [SerializeField] private List<Factor> startingFactors = new List<Factor>();
-
     [Header("Settings")]
     [SerializeField] private float dayDuration = 10f;
     [HideInInspector] public float timer;
@@ -65,16 +62,14 @@ public class GameHandler : MonoBehaviour, Animatable
 
         //STARTING PROCESS - create factors, two starter houses, cutscene, dialogue
 
-        //factors
-        foreach(Factor factor in startingFactors) {
-            FactorsHandler.instance.AddFactor(factor);
-        }
-
+        //STARTING FACTORS
+        FactorsHandler.instance.AddStartingEvents();
+        
         //show the starting emote for the two houses
         ConnectionGroup targetNeighborsGroup = ConnectionsHandler.instance.connectionGroups.FirstOrDefault(x => x.connection.name == "Neighbors");
         EmoteHandler.instance.CreateEmote(Emote.Sad, targetNeighborsGroup, 5f);
         //animation for focusing on two houses
-        PlayerController.instance.CameraZoom(ConnectionsHandler.instance.GetAverageConnectionGroupTilePosition(targetNeighborsGroup), 4f, 2f, 2f, 3f);
+        PlayerController.instance.CameraZoom(GridHandler.instance.GetAverageTileListPosition(targetNeighborsGroup.tiles), 4f, 2f, 2f, 3f);
         
         //show starting dialogue
         yield return new WaitForSeconds(5f);
@@ -119,6 +114,9 @@ public class GameHandler : MonoBehaviour, Animatable
         } else {
             housingSpawnChance *= 3; //1, 3, 9, 27, 81, 100+
         }
+
+        //GAME LOOP - try to add a random factor if not at max
+        FactorsHandler.instance.TryAddRandomFactor();
 
         StatsHandler.instance.UpdateStats();
         CheckGameOver();
@@ -179,6 +177,12 @@ public class GameHandler : MonoBehaviour, Animatable
 
         //add connections buildable has with adjacent tiles, if any
         ConnectionsHandler.instance.TryAddConnections(targetSpot);
+
+        //add or merge communities if any
+        CommunitiesHandler.instance.TryAddCommunities(targetSpot);
+
+        //create emote to alert player
+        EmoteHandler.instance.CreateEmote(Emote.Alert, targetSpot.holder.transform.position, 1f);
     }
 
     //--------------------------------------GAME INTRO--------------------------------------

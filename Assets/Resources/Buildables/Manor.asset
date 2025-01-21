@@ -20,5 +20,10 @@ MonoBehaviour:
   _environmentEffect: -3
   _happinessEffect: 3
   _economyEffect: 0
+  _requiredConnection: {fileID: 0}
+  _buildableType: 2
+  _pollutionInfluence: 0
+  _residents: 3
+  _requiredCustomers: 0
   _upgrade: {fileID: 0}
   _tile: {fileID: 6082287250297484355, guid: 09e7857430abf444da3083166a93b484, type: 3}

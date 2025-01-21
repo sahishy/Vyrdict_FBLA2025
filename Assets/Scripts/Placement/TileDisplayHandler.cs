@@ -15,6 +15,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
     [SerializeField] private Image buildableIcon;
     [SerializeField] private TMP_Text buildableName;
     [SerializeField] private TMP_Text buildableDescription;
+    [SerializeField] private TMP_Text buildableStatus;
     private bool panelToggling = false; //used to prevent hover animation from happening while the UI is already opening/closing
 
     void Awake() {
@@ -35,8 +36,11 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
 
         //end all current UI animations
         DOTween.Kill(displayPanel);
-        displayPanel.anchoredPosition = new Vector2(0, 40);
-        panelToggling = false;
+        if(panelToggling) {
+            displayPanel.anchoredPosition = new Vector2(0, 40);
+            panelToggling = false;            
+        }
+        displayPanel.transform.DOPunchScale(Vector3.one * 0.02f, 0.1f).SetId(displayPanel);
 
         //hide the old tile outline
         if(displayedTile != null) {
@@ -46,11 +50,22 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         //store tile
         displayedTile = tile;
 
+        //--GET STATUS--
+        string status = "";
+        if(tile.currentBuildable.requiredConnection != null) {
+            if(ConnectionsHandler.instance.RequiredConnectionMet(tile)) {
+                status = tile.currentBuildable.positiveRequiredConnectionStatusText;
+            } else {
+                status = tile.currentBuildable.negativeRequiredConnectionStatusText;
+            }
+        }
+
         //---DISPLAY UI---
         buildableIcon.sprite = tile.currentBuildable.icon;
         buildableName.text = tile.currentBuildable.name;
         buildableDescription.text = tile.currentBuildable.description;
-        Debug.Log($"Display Shown: {tile.currentBuildable.name}");
+        buildableStatus.text = status;
+        // Debug.Log($"Display Shown: {tile.currentBuildable.name}");
 
         displayedTile.ToggleFocusDisplay(true);
 
@@ -76,7 +91,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
             return;
         }
         
-        Debug.Log("Display Hidden");
+        // Debug.Log("Display Hidden");
 
         //hide the old tile outline
         displayedTile.ToggleFocusDisplay(false);

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ConnectionsHandler : MonoBehaviour
 {
@@ -81,13 +79,7 @@ public class ConnectionsHandler : MonoBehaviour
             }
         }
 
-        UpdateVisuals();
-
-        // foreach(ConnectionGroup connectionGroup in connectionGroups) {
-        //     Connection connection = connectionGroup.connection;
-        //     List<GridTile> gridTiles = connectionGroup.tiles;
-        //     //Debug.Log($"{connection.name} ({gridTiles.Count - 1}x)");
-        // }
+        UpdateConnectionVisuals();
     }
 
     //Refreshes a connection group after a tile in it is changed
@@ -105,7 +97,7 @@ public class ConnectionsHandler : MonoBehaviour
     }
 
     private Dictionary<ConnectionGroup, List<ConnectionLine>> allLines = new Dictionary<ConnectionGroup, List<ConnectionLine>>();
-    private void UpdateVisuals() {
+    private void UpdateConnectionVisuals() {
 
         foreach(List<ConnectionLine> lines in allLines.Values) {
             foreach(ConnectionLine line in lines) {
@@ -284,6 +276,7 @@ public class ConnectionsHandler : MonoBehaviour
         return targetTiles;
     }
 
+    //Get the number of connecting tiles a connection has
     public int GetConnectionCount(string name) {
         int count = 0;
         foreach(ConnectionGroup connectionGroup in connectionGroups.Where(x => x.connection.name == name)) {
@@ -291,18 +284,17 @@ public class ConnectionsHandler : MonoBehaviour
         }
         return count;
     }
+
+    //Returns whether a connection's net effect is benefiting the stats or decreasing the stats
     public bool GetConnectionPositive(Connection connection) {
         return connection.environmentEffect + connection.happinessEffect + connection.economyEffect >= 0;
     }
-    public Vector3 GetAverageConnectionGroupTilePosition(ConnectionGroup group) {
-        List<Vector3> tilePositions = group.tiles.ConvertAll(tile => tile.transform.position);
-        Vector3 averagePosition = new Vector3(
-            tilePositions.Average(pos => pos.x),
-            tilePositions.Average(pos => pos.y),
-            tilePositions.Average(pos => pos.z)
-        );
-        return averagePosition;
+    
+    //Return whether a buildable's required connection is met
+    public bool RequiredConnectionMet(GridTile tile) {
+        return GetConnectionGroups(tile).Any(x => x.connection == tile.currentBuildable.requiredConnection);
     }
+
 }
 
 public class ConnectionGroup {
