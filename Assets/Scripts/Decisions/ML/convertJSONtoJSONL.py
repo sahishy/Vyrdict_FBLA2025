@@ -1,32 +1,15 @@
-from datasets import load_dataset
 import json
-import os
 
-# Define the path to your dataset
-path = os.getcwd() + "/Assets/Scripts/Decisions/ML/"
-
-# Load your JSON dataset
-with open(path + 'dataset.json', 'r') as f:
+with open("dataset.json", "r") as f:
     data = json.load(f)
 
-# Process the dataset
-processed_data = []
-for item in data:
-    try:
-        processed_entry = {
-            "instruction": item["instruction"],
-            "input": item["input"],
-            "output": json.dumps(item["output"])  # Serialize the nested JSON
+with open("dataset.jsonl", "w") as f_out:
+    for entry in data:
+        jsonl_entry = {
+            "messages": [
+                {"role": "system", "content": "You generate ethical dilemmas for a strategy game. The game has three stats: Environment, Happiness, and Economy. Ensure every scenario follows the game mechanics and provides three choices, each affecting two stats."},
+                {"role": "user", "content": f"Given the following player data, create an ethical scenario and three choices.\nData: {entry['input']}"},
+                {"role": "assistant", "content": json.dumps(entry["output"])}
+            ]
         }
-        processed_data.append(processed_entry)
-    except KeyError as e:
-        print(f"Missing key {e} in item: {item}")
-        continue
-
-# Save as JSONL for Hugging Face
-output_path = path + "fine_tune_data.jsonl"
-with open(output_path, 'w') as f:
-    for entry in processed_data:
-        f.write(json.dumps(entry) + "\n")
-
-print(f"Processed JSONL saved to {output_path}")
+        f_out.write(json.dumps(jsonl_entry) + "\n")
