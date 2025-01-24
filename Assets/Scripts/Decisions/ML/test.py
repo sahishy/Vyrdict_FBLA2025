@@ -1,170 +1,27 @@
 import json
+import os
+from flask import Flask
 from openai import OpenAI
 
 OPENAI_API_KEY = "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"
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+app = Flask(__name__)
 
-system_message = {
-    "role": "system",
-    "content": """You will create a short ethical dilemma for a player managing an island-based community in a strategy game. 
-    The ethical dilemma will be based off three main stats of the player's island, so make the scenarios logical with the given context.
-    The game is about survival and decision-making, where players must balance these main stats:
+system_message = ""
+tool_schema = ""
 
-    - **Environment** (Impact on nature and sustainability)
-    - **Happiness** (Well-being and satisfaction of citizens)
-    - **Economy** (Financial stability and economic growth)
+# LOAD PROMPT FILE
 
-    ### **Game Content:**
-    - The game takes place in a medieval setting.
-    - The game is supposed to invoke deep ethical decision-making.
-    - The player isn't recognized by the community, and all situations are communicated to the player by referring to the island as 'theirs'.
-    - The player must **survive as long as possible** while facing **weekly ethical dilemmas**.
-    - If **any stat reaches 0, they lose**.
-    - Players can **build and upgrade structures**, each with **unique effects on the three main stats**.
-    - The game includes **ONLY** the following buildings:
+with open(os.getcwd() + '/Assets/Scripts/Decisions/ML/prompt.txt', 'r') as file:
+    system_message = file.read()
 
-    ### **Valid Buildings:**  
-    Blacksmith, Blacksmith Blueprint, Booth, Church, Church Blueprint, Farm, Hill, House,  
-    Lumbermill, Lumbermill Blueprint, Manor, Market, Market Blueprint, Mine,  
-    Rock, Tavern, Tavern Blueprint, Tent, Well, Windmill, Windmill Blueprint  
+# LOAD TOOL SCHEMA FILE
 
-    ### **Buildings WITHOUT Prerequisites**
-    Tent, Rock, Booth, Well, Farm, Blacksmith Blueprint, Church Blueprint, Lumbermill Blueprint, Tavern Blueprint, Windmill Blueprint
+with open(os.getcwd() + '/Assets/Scripts/Decisions/ML/tool_schema.json', 'r') as file:
+    tool_schema = json.load(file)
 
-    ### **Valid Upgrades (MUST STRICTLY FOLLOW THIS RULESET)**
-    **A buildable can ONLY be offered if its required prerequisite is found in `placedBuildables`.**
-    If the prerequisite is missing, the AI MUST NOT offer that buildable. 
-
-    #### **Upgrade Prerequisites (Lookup Required)**
-    - **Blacksmith Blueprint → Blacksmith** *(Blacksmith Blueprint must be in `placedBuildables` to offer Blacksmith.)*
-    - **Booth → Market Blueprint** *(Booth must be in `placedBuildables` to offer Market Blueprint.)*
-    - **Church Blueprint → Church** *(Church Blueprint must be in `placedBuildables` to offer Church.)*
-    - **Hill → Mine** *(Hill must be in `placedBuildables` to offer Mine.)*
-    - **House → Manor** *(House must be in `placedBuildables` to offer Manor.)*
-    - **Lumbermill Blueprint → Lumbermill** *(Lumbermill Blueprint must be in `placedBuildables` to offer Lumbermill.)*
-    - **Market Blueprint → Market** *(Market Blueprint must be in `placedBuildables` to offer Market.)*
-    - **Rock → Hill** *(Rock must be in `placedBuildables` to offer Hill.)*
-    - **Tavern Blueprint → Tavern** *(Tavern Blueprint must be in `placedBuildables` to offer Tavern.)*
-    - **Tent → House** *(Tent must be in `placedBuildables` to offer House.)*
-    - **Windmill Blueprint → Windmill** *(Windmill Blueprint must be in `placedBuildables` to offer Windmill.)*
-
-
-    ### **STRICT RULES (YOU MUST FOLLOW EXACTLY):**
-    1. **DO NOT invent new buildings. Use ONLY the buildings from the list above.**
-    2. **For upgrades, ONLY offer them if the player has the PREVIOUS upgrade in `placedBuildables`. If the prerequisite is missing, **DO NOT** offer the buildable.**
-       *(#2 - Example: The Tent upgrades into House, so only offer the House buildable if there is a Tent in `placedBuildables`.)*
-       *(#2 - Example: The Rock upgrades into Hill, so only offer the Hill buildable if there is a Rock in `placedBuildables`.)*
-       *(#2 - Example: The Market Blueprint upgrades into Market, so only offer the Market buildable if there is a Market Blueprint in `placedBuildables`.)*
-       *(#2 - Example: The Booth doesn't have a previous upgrade, so you can offer it anytime as long as it makes sense with the scenario.)*
-    3. **The player's current placed buildables are provided in the placedBuildables="ex, ex, ex"`**
-    4. **If a choice would result in a buildable that the player does not have the prerequisite for, then set `buildable:` to a contextually appropriate buildable from the list of buildings without a prerequisite.
-    5. **Every response MUST be valid JSON with NO extra text.**
-    6. **Every scenario MUST include three choices.**
-    7. **Each choice MUST affect two stats (one increase, one decrease).**
-    8. **Each choice MUST provide a valid building as a reward.**
-    9. **All values MUST be realistic within gameplay mechanics.**
-    10. **DO NOT add any explanations, introductions, or extra text. ONLY return the JSON object.**
-    11. **MUST use an accessible level of English, keeping descriptions of scenarios and choices short yet informative.**
-
-    ---
-    ### **STRICT JSON RESPONSE FORMAT (NO EXTRA TEXT)**
-    ```json
-    {
-        "Scenario": "A short, concise, brief 2nd-person description of an ethical dilemma based on the player's stats. 1-2 sentences.",
-        "Choices": {
-            "1": {
-                "description": "Choice 1 description (must be short and direct).",
-                "stat1": "Environment | Happiness | Economy",
-                "effect1": INTEGER (+/- value),
-                "stat2": "Environment | Happiness | Economy",
-                "effect2": INTEGER (+/- value),
-                "buildable": "A valid building from the list above"
-            },
-            "2": {
-                "description": "Choice 2 description.",
-                "stat1": "Environment | Happiness | Economy",
-                "effect1": INTEGER (+/- value),
-                "stat2": "Environment | Happiness | Economy",
-                "effect2": INTEGER (+/- value),
-                "buildable": "A valid building from the list above"
-            },
-            "3": {
-                "description": "Choice 3 description.",
-                "stat1": "Environment | Happiness | Economy",
-                "effect1": INTEGER (+/- value),
-                "stat2": "Environment | Happiness | Economy",
-                "effect2": INTEGER (+/- value),
-                "buildable": "A valid building from the list above"
-            }
-        }
-    }
-    ```
-    """
-}
-
-tool_schema = [
-    {
-        "type": "function",
-        "function": {
-            "name": "generate_dilemma",
-            "description": "Create an ethical dilemma for a player managing an island-based community in a strategy game.",
-            "parameters": {
-                "type": "object",
-                "required": ["scenario", "choices"],
-                "properties": {
-                    "scenario": {
-                        "type": "string",
-                        "description": "A short ethical dilemma description."
-                    },
-                    "choices": {
-                        "type": "object",
-                        "required": ["1", "2", "3"],
-                        "properties": {
-                            "1": {
-                                "type": "object",
-                                "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
-                                "properties": {
-                                    "description": {"type": "string"},
-                                    "stat1": {"type": "string"},
-                                    "effect1": {"type": "integer"},
-                                    "stat2": {"type": "string"},
-                                    "effect2": {"type": "integer"},
-                                    "buildable": {"type": "string"}
-                                }
-                            },
-                            "2": {
-                                "type": "object",
-                                "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
-                                "properties": {
-                                    "description": {"type": "string"},
-                                    "stat1": {"type": "string"},
-                                    "effect1": {"type": "integer"},
-                                    "stat2": {"type": "string"},
-                                    "effect2": {"type": "integer"},
-                                    "buildable": {"type": "string"}
-                                }
-                            },
-                            "3": {
-                                "type": "object",
-                                "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
-                                "properties": {
-                                    "description": {"type": "string"},
-                                    "stat1": {"type": "string"},
-                                    "effect1": {"type": "integer"},
-                                    "stat2": {"type": "string"},
-                                    "effect2": {"type": "integer"},
-                                    "buildable": {"type": "string"}
-                                }
-                            }
-                        }
-                    }
-                }
-            }            
-        }
-    }
-]
-
+# THE DATA OF THE PLAYER TO PROVIDE AS INPUT
 
 data = {
     "environment": 75,
@@ -173,7 +30,7 @@ data = {
     "placedBuildables": ["House", "House", "Tent", "Tavern", "Hill", "Blacksmith Blueprint", "Windmill Blueprint", "Farm", "Farm", "Farm", "Tent", "Tent"]
 }
 
-
+# CONVERTING DATA INTO A READABLE STRING TO PROVIDE AS INPUT TO THE MODEL
 
 def convertToData(jsonObject):
     _data = ""
@@ -188,6 +45,8 @@ def convertToData(jsonObject):
     _data += ")."
 
     return _data
+
+# GETTING OPENAI MODEL RESPONSE
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
@@ -204,6 +63,8 @@ response = client.chat.completions.create(
     ]
 )
 
+# CONVERTING RESPONSE TO READABLE DATA
+
 response_dict = response.to_dict()
 message_response = response_dict["choices"][0]["message"]
 
@@ -212,4 +73,11 @@ function_name = tool_call["function"]["name"]
 arguments_json = tool_call["function"]["arguments"]
 function_args = json.loads(arguments_json)
 
-print(json.dumps(function_args, indent=4))
+# SEND ARGUMENTS TO UNITY VIA FLASK
+
+# @app.route('/')
+# def index(): 
+#     return function_args
+
+# if __name__ == "__main__":
+#     app.run(host="127.0.0.1", port=5000, debug=True)
