@@ -33,6 +33,7 @@ public class StatsHandler : MonoBehaviour
     [SerializeField] private Transform factorsHolder;
     [SerializeField] private List<Sprite> statSprites = new List<Sprite>();
     [SerializeField] private GameObject statEffectPrefab;
+    [SerializeField] private GameObject statChangePrefab;
     private List<GameObject> statEffects = new List<GameObject>();
     
 
@@ -113,6 +114,11 @@ public class StatsHandler : MonoBehaviour
 
         //update UI to accurately display stats
         UpdateUI();
+
+        //show stat change animation for each stat
+        StatChangeAnimation(Stat.Materials, GetTotalStatChange(Stat.Materials));
+        StatChangeAnimation(Stat.Food, GetTotalStatChange(Stat.Food));
+        StatChangeAnimation(Stat.Gold, GetTotalStatChange(Stat.Gold));
     }
 
     //Returns the stat effects of a buildable based on various factors
@@ -187,6 +193,7 @@ public class StatsHandler : MonoBehaviour
             gold += amount;
         }
         UpdateUI();
+        StatChangeAnimation(stat, amount);
     }
 
     //-------------------------------------------------UI-------------------------------------------------
@@ -271,6 +278,30 @@ public class StatsHandler : MonoBehaviour
         foreach(GameObject effect in statEffects) {
             Destroy(effect);
         }
+    }
+
+    private void StatChangeAnimation(Stat stat, int change) {
+        if(change == 0) {
+            return;
+        }
+
+        Vector3 targetPos = Vector3.zero;
+        if(stat == Stat.Materials) {
+            targetPos = materialsText.transform.position;
+        } else if(stat == Stat.Food) {
+            targetPos = foodText.transform.position;
+        } else if(stat == Stat.Gold) {
+            targetPos = goldText.transform.position;
+        }
+        Vector3 startPos = targetPos - new Vector3(0, 60, 0);
+        Vector3 endPos = targetPos - new Vector3(0, 20, 0);
+
+        TMP_Text statChange = Instantiate(statChangePrefab, materialsText.transform.parent.parent.parent).GetComponent<TMP_Text>();
+        statChange.text = change > 0 ? $"+{change}" : $"{change}";
+        statChange.color = change > 0 ? positiveColor : negativeColor;
+        statChange.transform.position = startPos;
+        statChange.transform.DOMove(endPos, 3f);
+        statChange.DOFade(0f, 3f);
     }
 
     //-------------------------------------------------UTILITY-------------------------------------------------

@@ -116,7 +116,6 @@ public class DecisionHandler : MonoBehaviour
         //CHANGE STATS AND ADD ITEM
         StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat1), int.Parse(choiceData.effect1));
         StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat2), int.Parse(choiceData.effect2));
-        InventoryHandler.instance.TryAddItem(PlacementHandler.instance.GetBuildable(choiceData.buildable), 1);
 
         inDecisionMode = false;
         cooldown = false;

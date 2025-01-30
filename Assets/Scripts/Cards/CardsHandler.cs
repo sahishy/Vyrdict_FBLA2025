@@ -48,7 +48,34 @@ public class CardsHandler : MonoBehaviour
         Card card = focusedGameCard.card;
 
         if(card.cardType == CardType.Buildable) {
+
             PlacementHandler.instance.EnterPlacementMode(card);
+
+        } else if(card.cardType == CardType.Upgrade) {
+
+
+            
+        } else if(card.cardType == CardType.Convert) {
+
+            StatsHandler.instance.ChangeStat(card.statFrom, -card.statFromValue);
+            StatsHandler.instance.ChangeStat(card.statTo, card.statToValue);
+
+        } else if(card.cardType == CardType.Boost) {
+
+            StatsHandler.instance.ChangeStat(card.boostedStat, card.boostValue);
+
+        } else if(card.cardType == CardType.Ability) {
+
+
+            
+        } else if(card.cardType == CardType.Factor) {
+
+
+            
+        } else if(card.cardType == CardType.Crisis) {
+
+
+            
         }
 
         HideCardScreen(false);

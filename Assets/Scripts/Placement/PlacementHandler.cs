@@ -142,10 +142,6 @@ public class PlacementHandler : MonoBehaviour, Animatable
                 //-----------FACTOR LOGIC-----------
                 FactorsHandler.instance.UpdateFactors();
 
-                // //-----------INVENTORY LOGIC-----------
-                // //Remove item from inventory
-                // InventoryHandler.instance.RemoveItem(currentBuildable);
-
                 //-----------STATS LOGIC-----------
                 if(isUpgrade) {
                     StatsHandler.instance.ChangeStat(Stat.Materials, -currentCard.upgradeMaterialCost);
