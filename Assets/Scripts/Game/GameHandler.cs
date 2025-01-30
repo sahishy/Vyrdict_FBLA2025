@@ -14,6 +14,7 @@ public class GameHandler : MonoBehaviour, Animatable
     public bool timeFrozen = true;
     public int currentDay = 0;
     public int currentWeek = 0;
+    public int fateTimer = 7;
 
     [Header("Settings")]
     [SerializeField] private float dayDuration = 10f;
@@ -30,6 +31,8 @@ public class GameHandler : MonoBehaviour, Animatable
     [SerializeField] private TMP_Text dayText;
     [SerializeField] private Image dayBar;
     [SerializeField] private TMP_Text weekText;
+    [SerializeField] private TMP_Text fateText;
+    [SerializeField] private Image fateBar;
 
     private bool timeInformationActive = false;
     private int statsInformationIndex = -1;
@@ -57,7 +60,7 @@ public class GameHandler : MonoBehaviour, Animatable
         StartWeek();
 
         //UPDATE UI
-        UpdateTimeUI();
+        UpdateUI();
         StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>(), 1f));
 
         //STARTING PROCESS - create factors, two starter houses, cutscene, dialogue
@@ -116,13 +119,16 @@ public class GameHandler : MonoBehaviour, Animatable
         }
 
         //GAME LOOP - try to add a random factor if not at max
-        FactorsHandler.instance.TryAddRandomFactor();
+        //FactorsHandler.instance.TryAddRandomFactor();
 
+        //GAME LOOP - change stats
         StatsHandler.instance.UpdateStats();
-        CheckGameOver();
+
+        //GAME LOOP - check if player lost
+        Fate();
 
         //UPDATE ACTIVE UI - make sure to update UI that is open after stats are updated
-        UpdateTimeUI();
+        UpdateUI();
         if(statsInformationIndex != -1) {
             StatsHandler.instance.ShowStatsInformation(statsInformationIndex);
         }
@@ -143,10 +149,12 @@ public class GameHandler : MonoBehaviour, Animatable
         ToggleTimeFreeze(false);
     }
 
-    //Checks if any of the stats reached zero at the end of a day, if so then the player lost
-    private void CheckGameOver() {
-        if(StatsHandler.instance.AnyStatZero()) {
-            EndGame();
+    //Fate functionality, decreases fate timer at the end of each day, ends game if the fate timer is at zero
+    private void Fate() {
+        fateTimer--;
+
+        if(fateTimer <= 0) {
+            //EndGame();
         }
     }
 
@@ -188,16 +196,37 @@ public class GameHandler : MonoBehaviour, Animatable
     //--------------------------------------GAME INTRO--------------------------------------
     private void IntroAnimation() {
         gameplayScreen.DOFade(1f, 3f);
+
+        StartCoroutine(IntroStormAnimation());
+    }
+    private IEnumerator IntroStormAnimation() {
+        GameObject.Find("Rain").SetActive(true);
+        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(100, 150, 150, 255), 3);
+        DOTween.To(() => RenderSettings.fogStartDistance, x => RenderSettings.fogStartDistance = x, 0, 3);
+        DOTween.To(() => RenderSettings.fogEndDistance, x => RenderSettings.fogEndDistance = x, 30, 3);
+
+        yield return new WaitUntil(() => currentDay >= 7);
+
+        GameObject.Find("Rain").transform.GetChild(0).GetComponent<ParticleSystem>().Stop();
+
+        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(0, 255, 255, 255), 3);
+        DOTween.To(() => RenderSettings.fogStartDistance, x => RenderSettings.fogStartDistance = x, 20, 3);
+        DOTween.To(() => RenderSettings.fogEndDistance, x => RenderSettings.fogEndDistance = x, 50, 3);
     }
 
     //--------------------------------------UI--------------------------------------
-    private void UpdateTimeUI() {
+    private void UpdateUI() {
         dayText.text = $"Day {currentDay}";
         dayText.transform.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
         dayBar.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
         weekText.text = $"Week {currentWeek}";
+        StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>()));
 
-        RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>());
+        fateText.text = $"{fateTimer} Days";
+        fateText.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
+        fateBar.DOFillAmount(fateTimer / 7f, 0.5f);
+        fateBar.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
+        StartCoroutine(RefreshContentSizeFitter(fateText.transform.parent.GetComponent<ContentSizeFitter>()));
     }
     private IEnumerator RefreshContentSizeFitter(ContentSizeFitter contentSizeFitter, float delay = 0f) {
         yield return new WaitForSeconds(delay);

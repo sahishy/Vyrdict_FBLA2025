@@ -21,6 +21,7 @@ public class DecisionHandler : MonoBehaviour
 
     [SerializeField] private TMP_Text weekCounter;
     [SerializeField] private TMP_Text label;
+    [SerializeField] private TMP_Text scenario;
 
     [SerializeField] private TMP_Text eventLabel;
     [SerializeField] private TMP_Text eventEffect;
@@ -71,13 +72,23 @@ public class DecisionHandler : MonoBehaviour
         //STARTING ANIMATION
         StartCoroutine(DecisionMakingAnimation());
     }
-    //Creates choices slowly, makes sure player isn't overwhelmed by all at once
-    private void ChoiceCreation() {
-        List<Decision> topDecisions = GetTopDecisions();
+    //Creates choices from ML generated scenario
+    private void ChoiceCreation(ResponseData response) {
+        
 
         for(int i = 0; i < 3; i++) {
+            ChoiceData choiceData;
+            if (i == 0) {
+                choiceData = response.choices.choice1;
+            } else if(i == 1) {
+                choiceData = response.choices.choice2;
+            } else {
+                choiceData = response.choices.choice3;
+            }
+
             DecisionChoice choice = Instantiate(decisionChoicePrefab, decisionChoiceHolder.transform).GetComponent<DecisionChoice>();
-            choice.Initialize(topDecisions[i], i);
+
+            choice.Initialize(choiceData, i);
         }
     }
     //Resets cooldown to prevent player from accidentally selecting a choice the second it appears
@@ -85,7 +96,7 @@ public class DecisionHandler : MonoBehaviour
         cooldown = false;
     }
     //Called when player selects a choice in the decision screen
-    public void SelectChoice(Decision decision) {
+    public void SelectChoice(ChoiceData choiceData) {
         if(cooldown) {
             return;
         }
@@ -102,8 +113,10 @@ public class DecisionHandler : MonoBehaviour
 
         Invoke(nameof(ResetDecisionMakingAnimation), 1f);
 
-        //add choice to inventory
-        InventoryHandler.instance.TryAddItem(decision.buildable, decision.amount);
+        //CHANGE STATS AND ADD ITEM
+        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat1), int.Parse(choiceData.effect1));
+        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat2), int.Parse(choiceData.effect2));
+        InventoryHandler.instance.TryAddItem(PlacementHandler.instance.GetBuildable(choiceData.buildable), 1);
 
         inDecisionMode = false;
         cooldown = false;
@@ -112,52 +125,18 @@ public class DecisionHandler : MonoBehaviour
         GameHandler.instance.StartWeek();
     }
 
-    //Returns the best 3 decisions to give the player based on their current stats
-    public List<Decision> GetTopDecisions() {
-        // Create a dictionary to store each decision and its score
-        Dictionary<Decision, float> decisionScores = new Dictionary<Decision, float>();
-
-        // Evaluate each decision based on relevance
-        foreach (Decision decision in allDecisions) {
-            Buildable buildable = decision.buildable;
-            int amount = decision.amount;
-
-            // Calculate the potential stat changes from the buildable
-            int environmentEffect = buildable.environmentEffect * amount;
-            int happinessEffect = buildable.happinessEffect * amount;
-            int economyEffect = buildable.economyEffect * amount;
-
-            // Score the decision based on the player's current stat needs
-            float score = 0;
-
-            // Prioritize decisions that address deficits
-            if (StatsHandler.instance.GetStat(Stat.Environment) < 50) score += environmentEffect * 1.5f;
-            else score += environmentEffect;
-
-            if (StatsHandler.instance.GetStat(Stat.Happiness) < 50) score += happinessEffect * 1.5f;
-            else score += happinessEffect;
-
-            if (StatsHandler.instance.GetStat(Stat.Economy) < 50) score += economyEffect * 1.5f;
-            else score += economyEffect;
-
-            // Avoid decisions that worsen stats already in deficit
-            if (StatsHandler.instance.GetStat(Stat.Environment) < 50 && environmentEffect < 0) score -= Mathf.Abs(environmentEffect) * 2;
-            if (StatsHandler.instance.GetStat(Stat.Happiness) < 50 && happinessEffect < 0) score -= Mathf.Abs(happinessEffect) * 2;
-            if (StatsHandler.instance.GetStat(Stat.Economy) < 50 && economyEffect < 0) score -= Mathf.Abs(economyEffect) * 2;
-
-            // Add the score to the dictionary
-            decisionScores.Add(decision, score);
-        }
-
-        // Sort decisions by score and return the top 3
-        return decisionScores.OrderByDescending(pair => pair.Value).Select(pair => pair.Key).Take(3).ToList();
-    }
-
     //--------------------------------------UI--------------------------------------
 
     //Animation that handles showing all the important factors one at a time
     private IEnumerator DecisionMakingAnimation() {
         
+        //---------------------------------FETCH GENERATED ML DATA----------------------------------------------
+
+        ResponseData response = null;
+        StartCoroutine(MLDataHandler.instance.FetchMLResponse());
+        
+        //------------------------------------------------------------------------------------------------------
+
         weekCounter.text = $"Week {GameHandler.instance.currentWeek - 1}";
         weekCounter.transform.DOScale(0.8f, 1f);
 
@@ -186,33 +165,43 @@ public class DecisionHandler : MonoBehaviour
         float randomHappinessAnimationTime = animationTime + Random.Range(0f, 1f);
         float randomEconomyAnimationTime = animationTime + Random.Range(0f, 1f);
 
-        environmentBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Environment) / 100f, randomEnvironmentAnimationTime).SetEase(Ease.OutExpo);
-        happinessBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Happiness) / 100f, randomHappinessAnimationTime).SetEase(Ease.OutExpo);
-        economyBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Economy) / 100f, randomEconomyAnimationTime).SetEase(Ease.OutExpo);
+        environmentBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Materials) / 100f, randomEnvironmentAnimationTime).SetEase(Ease.OutExpo);
+        happinessBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Food) / 100f, randomHappinessAnimationTime).SetEase(Ease.OutExpo);
+        economyBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Gold) / 100f, randomEconomyAnimationTime).SetEase(Ease.OutExpo);
 
         //show raw stat values, do counting animation
         float _environmentValue = 0f;
         float _happinessValue = 0f;
         float _economyValue = 0f;
 
-        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Environment), randomEnvironmentAnimationTime)
+        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Materials), randomEnvironmentAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => environmentText.text = Mathf.RoundToInt(_environmentValue).ToString());
-        DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.GetStat(Stat.Happiness), randomHappinessAnimationTime)
+        DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.GetStat(Stat.Food), randomHappinessAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => happinessText.text = Mathf.RoundToInt(_happinessValue).ToString());
-        DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.GetStat(Stat.Economy), randomEconomyAnimationTime)
+        DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.GetStat(Stat.Gold), randomEconomyAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => economyText.text = Mathf.RoundToInt(_economyValue).ToString());
 
         yield return new WaitForSeconds(3f);
 
         //show status color of raw stats (red bad, white neutral, green good)
-        environmentText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Environment)), 1f);
-        happinessText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Happiness)), 1f);
-        economyText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Economy)), 1f);
+        environmentText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Materials)), 1f);
+        happinessText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Food)), 1f);
+        economyText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Gold)), 1f);
 
         //give extra time to look at stats
         yield return new WaitForSeconds(2f);
 
-        //hide stats of the week, propose question
+        //---------------------------------WAIT UNTIL GENERATED ML DATA LOADS------------------------------------
+
+        yield return new WaitUntil(() => MLDataHandler.instance.currentData != null);
+
+        response = MLDataHandler.instance.currentData;
+
+        MLDataHandler.instance.currentData = null;
+        
+        //-------------------------------------------------------------------------------------------------------
+
+        //hide stats of the week
         label.DOFade(0, 1f);
         yield return new WaitForSeconds(1f);
 
@@ -222,14 +211,20 @@ public class DecisionHandler : MonoBehaviour
         weekStatsTextHolder.transform.DOScale(0.575f, 2f).SetEase(Ease.InOutCubic);
         yield return new WaitForSeconds(2f);
 
-        label.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 200);
+        //propose scenario
+        yield return StartCoroutine(ScenarioTextAnimation(response.scenario));
+
+        //yield return new WaitForSeconds(1);
+
+        //propose choices
+        label.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 100);
         label.text = "What will you do?";
         label.DOFade(1f, 3f);
 
-        yield return new WaitForSeconds(2f);
+        //yield return new WaitForSeconds(1f);
 
         //CREATING CHOICES
-        ChoiceCreation();
+        ChoiceCreation(response);
     }
     //Reset the changes made by animation in DecisionMakingAnimation()
     private void ResetDecisionMakingAnimation() {
@@ -239,6 +234,7 @@ public class DecisionHandler : MonoBehaviour
         label.alpha = 0;
         label.text = "Here are your stats for the week:";
         label.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 75);
+        scenario.text = "";
 
         weekStatsHolder.anchoredPosition = new Vector2(0, 0);
         weekStatsHolder.GetComponent<CanvasGroup>().alpha = 0;
@@ -259,6 +255,24 @@ public class DecisionHandler : MonoBehaviour
 
         foreach(Transform child in decisionChoiceHolder.transform) {
             Destroy(child.gameObject);
+        }
+    }
+    //Scenario text animation, typewriter effect
+    private IEnumerator ScenarioTextAnimation(string scenarioText) {
+        float normalDelay = 0.04f;
+        float periodDelay = 0.5f;
+        float commaDelay = 0.2f;
+
+        for (int i = 0; i < scenarioText.Length; i++) {
+            scenario.text = scenarioText.Substring(0, i + 1);
+
+            if(scenarioText[i] == '.') {
+                yield return new WaitForSeconds(periodDelay);
+            } else if(scenarioText[i] == ',') {
+                yield return new WaitForSeconds(commaDelay);
+            } else {
+                yield return new WaitForSeconds(normalDelay);
+            }
         }
     }
 

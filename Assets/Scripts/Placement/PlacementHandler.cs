@@ -11,6 +11,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
 
     [Header("Placement")]
     [HideInInspector] public bool inPlacementMode = false;
+    private Card currentCard;
     private Buildable currentBuildable;
     [HideInInspector] public GameObject currentGhost;
     private GridTile currentTile;
@@ -27,9 +28,9 @@ public class PlacementHandler : MonoBehaviour, Animatable
     };
 
     [Header("References")]
+    [SerializeField] private RectTransform deckHolder;
     [SerializeField] private GameObject placementPanel;
     [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private Transform cancelButton;
     [SerializeField] private Transform placeButtonFocusHolder;
     [SerializeField] private CanvasGroup placeButton;
     [SerializeField] private Transform rotateButton;
@@ -61,9 +62,10 @@ public class PlacementHandler : MonoBehaviour, Animatable
         // }
     }
 
-    public void EnterPlacementMode(Buildable buildable) {
+    public void EnterPlacementMode(Card card) {
         inPlacementMode = true;
-        currentBuildable = buildable;
+        currentCard = card;
+        currentBuildable = card.buildable;
 
         Camera.main.DOFieldOfView(Camera.main.fieldOfView - 10, 0.5f);
 
@@ -72,9 +74,11 @@ public class PlacementHandler : MonoBehaviour, Animatable
         TileDisplayHandler.instance.HideDisplay();
         DialogueHandler.instance.CloseDialogue();
 
+        deckHolder.DOAnchorPos(new Vector2(0, -75), 0.5f).SetEase(Ease.InBack);
+
         //Placement Visuals
         TogglePlacementUI(true);
-        CreateGhost(buildable);
+        CreateGhost(currentBuildable);
     }
     public void ExitPlacementMode() {
         inPlacementMode = false;
@@ -84,6 +88,8 @@ public class PlacementHandler : MonoBehaviour, Animatable
 
         rotationStep = 0;
         currentRotation = rotations[rotationStep];
+
+        deckHolder.DOAnchorPos(new Vector2(0, 25), 0.5f).SetEase(Ease.InBack);
 
         DestroyGhost();
         TogglePlacementUI(false);
@@ -136,9 +142,18 @@ public class PlacementHandler : MonoBehaviour, Animatable
                 //-----------FACTOR LOGIC-----------
                 FactorsHandler.instance.UpdateFactors();
 
-                //-----------INVENTORY LOGIC-----------
-                //Remove item from inventory
-                InventoryHandler.instance.RemoveItem(currentBuildable);
+                // //-----------INVENTORY LOGIC-----------
+                // //Remove item from inventory
+                // InventoryHandler.instance.RemoveItem(currentBuildable);
+
+                //-----------STATS LOGIC-----------
+                if(isUpgrade) {
+                    StatsHandler.instance.ChangeStat(Stat.Materials, -currentCard.upgradeMaterialCost);
+                    StatsHandler.instance.ChangeStat(Stat.Gold, -currentCard.upgradeGoldCost);
+                } else {
+                    StatsHandler.instance.ChangeStat(Stat.Materials, -currentCard.buildableMaterialCost);
+                    StatsHandler.instance.ChangeStat(Stat.Gold, -currentCard.buildableGoldCost);
+                }
 
                 //-----------END-----------
                 //Exit placement mode here - currentBuildable set to null here
@@ -345,20 +360,12 @@ public class PlacementHandler : MonoBehaviour, Animatable
     private Buildable GetPreviousUpgrade(Buildable buildable) {
         return Resources.LoadAll<Buildable>("Buildables").FirstOrDefault(x => x.upgrade != null && x.upgrade.name == buildable.name);
     }
+    //returns a buildable based on a provided name
+    public Buildable GetBuildable(string name) {
+        return Resources.LoadAll<Buildable>("Buildables").FirstOrDefault(x => x.name == name);
+    }
 
     //----------------------------UI----------------------------
-
-    public void CancelButtonClick() {
-        ExitPlacementMode();
-        cancelButton.localScale = Vector3.one;
-    }
-    public void CancelButtonEnter() {
-        GameHandler.instance.currentFocusedAnimatable = this;
-        cancelButton.DOScale(1.2f, 0.2f);
-    }
-    public void CancelButtonExit() {
-        cancelButton.DOScale(1f, 0.2f);
-    }
 
     public void RotateButtonClick() {
         Rotate();
@@ -373,7 +380,6 @@ public class PlacementHandler : MonoBehaviour, Animatable
     }
 
     public void AnimatableExit() {
-        CancelButtonExit();
         RotateButtonExit();
     }
 

@@ -11,17 +11,17 @@ public class StatsHandler : MonoBehaviour
     public static StatsHandler instance;
 
     [Header("Stats - Main")]
-    public int economy = 100;
-    public int happiness = 100;
-    public int environment = 100;
+    public int materials = 100;
+    public int food = 100;
+    public int gold = 100;
     [Header("Stats - Misc")]
     public int population = 0;
     public int requiredPopulation = 0;
 
     [Header("References")]
-    [SerializeField] private Image environmentBar;
-    [SerializeField] private Image happinessBar;
-    [SerializeField] private Image economyBar;
+    [SerializeField] private TMP_Text materialsText;
+    [SerializeField] private TMP_Text foodText;
+    [SerializeField] private TMP_Text goldText;
 
     [SerializeField] private RectTransform focusIndicator;
     [SerializeField] private ContentSizeFitter contentSizeFitter;
@@ -50,17 +50,17 @@ public class StatsHandler : MonoBehaviour
     }
 
     //Sets the main stats to random values at the start of the game
-    //---Environment starts off high, as there is barely any pollution when the island is just made
-    //---Happiness starts off low, as the community has been sad for a while
-    //---Economy starts off low, as there is barely any economic activity
+    //---Materials starts off high, as the island is full of resources when it is just made
+    //---Food starts off low, as the community only has 2 tents at the start
+    //---Gold starts off low, as again, the community only has 2 tents at the start
     private void SetStartingStats() {
-        Vector2Int randomEnvironmentRange = new Vector2Int(90, 98);
-        Vector2Int randomHappinessRange = new Vector2Int(35, 45);
-        Vector2Int randomEconomyRange = new Vector2Int(20, 30);
+        Vector2Int randomMaterialsRange = new Vector2Int(90, 98);
+        Vector2Int randomFoodRange = new Vector2Int(35, 45);
+        Vector2Int randomGoldRange = new Vector2Int(20, 30);
 
-        environment = Random.Range(randomEnvironmentRange.x, randomEnvironmentRange.y);
-        happiness = Random.Range(randomHappinessRange.x, randomHappinessRange.y);
-        economy = Random.Range(randomEconomyRange.x, randomEconomyRange.y);
+        materials = Random.Range(randomMaterialsRange.x, randomMaterialsRange.y);
+        food = Random.Range(randomFoodRange.x, randomFoodRange.y);
+        gold = Random.Range(randomGoldRange.x, randomGoldRange.y);
     }
 
     //-------------------------------------------------STATS-------------------------------------------------
@@ -69,28 +69,20 @@ public class StatsHandler : MonoBehaviour
     public void UpdateStats() {
         //MAIN STATS
 
-        int unclampedEnvironment = environment;
-        int unclampedHappiness = happiness;
-        int unclampedEconomy = economy;
-
         foreach(PlacedBuildable placedBuildable in PlacementHandler.instance.GetPlacedBuildables()) {
 
             (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
 
-            unclampedEnvironment += buildableStatEffects.Item1;
-            unclampedHappiness += buildableStatEffects.Item2;
-            unclampedEconomy += buildableStatEffects.Item3;
+            materials += buildableStatEffects.Item1;
+            food += buildableStatEffects.Item2;
+            gold += buildableStatEffects.Item3;
         }
 
         foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
-            unclampedEnvironment += connectionGroup.connection.environmentEffect;
-            unclampedHappiness += connectionGroup.connection.happinessEffect;
-            unclampedEconomy += connectionGroup.connection.economyEffect;
+            materials += connectionGroup.connection.environmentEffect;
+            food += connectionGroup.connection.happinessEffect;
+            gold += connectionGroup.connection.economyEffect;
         }
-        
-        environment = Mathf.Clamp(unclampedEnvironment, 0, 100);
-        happiness = Mathf.Clamp(unclampedHappiness, 0, 100);
-        economy = Mathf.Clamp(unclampedEconomy, 0, 100);
 
         //MISC STATS
 
@@ -101,9 +93,9 @@ public class StatsHandler : MonoBehaviour
 
             foreach(Buildable buildable in community.tiles.ConvertAll(x => x.currentBuildable)) {
                 
-                if(buildable.buildableFocus == Stat.Happiness) {
+                if(buildable.buildableFocus == Stat.Food) {
                     communityPopulation += buildable.residents;
-                } else if(buildable.buildableFocus == Stat.Economy) {
+                } else if(buildable.buildableFocus == Stat.Gold) {
                     communityRequiredPopulation += buildable.requiredCustomers;
                 }
 
@@ -138,19 +130,19 @@ public class StatsHandler : MonoBehaviour
             //Change stat based on whether required connection is met or not
             switch(buildable.buildableFocus) {
             
-                case Stat.Environment:
+                case Stat.Materials:
                     environmentEffect += buildable.environmentEffect * effectModifier;
                     happinessEffect = buildable.happinessEffect;
                     economyEffect = buildable.economyEffect;
                     break;
                 
-                case Stat.Happiness:
+                case Stat.Food:
                     environmentEffect = buildable.environmentEffect;
                     happinessEffect += buildable.happinessEffect * effectModifier;
                     economyEffect = buildable.economyEffect;
                     break;
                 
-                case Stat.Economy:
+                case Stat.Gold:
                     environmentEffect = buildable.environmentEffect;
                     happinessEffect = buildable.happinessEffect;
                     economyEffect += buildable.economyEffect * effectModifier;
@@ -162,7 +154,7 @@ public class StatsHandler : MonoBehaviour
 
         //If the buildable is economic, change its economic output based on a formula which considers population
         //  ( (community's population) / (community's required population) ) * (multiplier)
-        if(buildable.buildableFocus == Stat.Economy) {
+        if(buildable.buildableFocus == Stat.Gold) {
             Community community = CommunitiesHandler.instance.GetCommunity(tile);
 
             int population;
@@ -187,12 +179,12 @@ public class StatsHandler : MonoBehaviour
 
     //Method for changing a stat directly
     public void ChangeStat(Stat stat, int amount) {
-        if(stat == Stat.Environment) {
-            environment += amount;
-        } else if(stat == Stat.Happiness) {
-            happiness += amount;
-        } else if(stat == Stat.Economy) {
-            economy += amount;
+        if(stat == Stat.Materials) {
+            materials += amount;
+        } else if(stat == Stat.Food) {
+            food += amount;
+        } else if(stat == Stat.Gold) {
+            gold += amount;
         }
         UpdateUI();
     }
@@ -200,10 +192,9 @@ public class StatsHandler : MonoBehaviour
     //-------------------------------------------------UI-------------------------------------------------
 
     private void UpdateUI() {
-        float maxStatAmount = 100f;
-        environmentBar.DOFillAmount(environment / maxStatAmount, 0.5f);
-        happinessBar.DOFillAmount(happiness / maxStatAmount, 0.5f);
-        economyBar.DOFillAmount(economy / maxStatAmount, 0.5f);
+        materialsText.text = materials.ToString();
+        foodText.text = food.ToString();
+        goldText.text = gold.ToString();
     }
 
     public void ShowStatsInformation(int index) {
@@ -215,17 +206,17 @@ public class StatsHandler : MonoBehaviour
         Stat stat = Stat.None;
 
         if(index == 0) {
-            header = $"Environmental Health: {environment}";
+            header = $"Materials: {materials}";
             focusIndicatorPos = -55;
-            stat = Stat.Environment;
+            stat = Stat.Materials;
         } else if(index == 1) {
-            header = $"Community Happiness: {happiness}";
+            header = $"Food: {food}";
             focusIndicatorPos = 0;
-            stat = Stat.Happiness;
+            stat = Stat.Food;
         } else if(index == 2) {
-            header = $"Economic Health: {economy}";
+            header = $"Gold: {gold}";
             focusIndicatorPos = 55;
-            stat = Stat.Economy;
+            stat = Stat.Gold;
         }
 
         headerText.text = header;
@@ -285,17 +276,24 @@ public class StatsHandler : MonoBehaviour
     //-------------------------------------------------UTILITY-------------------------------------------------
 
     public int GetStat(Stat stat) {
-        if(stat == Stat.Environment) {
-            return environment;
-        } else if(stat == Stat.Happiness) {
-            return happiness;
-        } else if(stat == Stat.Economy) {
-            return economy;
+        if(stat == Stat.Materials) {
+            return materials;
+        } else if(stat == Stat.Food) {
+            return food;
+        } else if(stat == Stat.Gold) {
+            return gold;
         }
         return 0;
     }
-    public bool AnyStatZero() {
-        return economy <= 0 || happiness <= 0 || environment <= 0;
+    public Stat GetStatByName(string name) {
+        if(name == "Materials") {
+            return Stat.Materials;
+        } else if(name == "Food") {
+            return Stat.Food;
+        } else if(name == "Gold") {
+            return Stat.Gold;
+        }
+        return Stat.None;
     }
     private string ConvertToBuildableEffectName(string name) {
         int placedBuildableCount = PlacementHandler.instance.GetPlacedBuildableCount(name);
@@ -359,11 +357,11 @@ public class StatsHandler : MonoBehaviour
             (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
 
             int focusedStatValue = 0;
-            if(stat == Stat.Environment) {
+            if(stat == Stat.Materials) {
                 focusedStatValue = buildableStatEffects.Item1;                
-            } else if(stat == Stat.Happiness) {
+            } else if(stat == Stat.Food) {
                 focusedStatValue = buildableStatEffects.Item2;
-            } else if(stat == Stat.Economy) {
+            } else if(stat == Stat.Gold) {
                 focusedStatValue = buildableStatEffects.Item3;
             }
 
@@ -386,7 +384,7 @@ public class StatsHandler : MonoBehaviour
         //key: connection name, value: effect on stat
         Dictionary<string, int> effects = new Dictionary<string, int>();
 
-        if(stat == Stat.Environment) {
+        if(stat == Stat.Materials) {
             foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
                 Connection connection = connectionGroup.connection;
 
@@ -399,7 +397,7 @@ public class StatsHandler : MonoBehaviour
                     effects.Add(connection.name, connection.environmentEffect * sameConnectionCount);
                 }
             }
-        } else if(stat == Stat.Happiness) {
+        } else if(stat == Stat.Food) {
             foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
                 Connection connection = connectionGroup.connection;
 
@@ -412,7 +410,7 @@ public class StatsHandler : MonoBehaviour
                     effects.Add(connection.name, connection.happinessEffect * sameConnectionCount);
                 }
             }  
-        } else if(stat == Stat.Economy) {
+        } else if(stat == Stat.Gold) {
             foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
                 Connection connection = connectionGroup.connection;
 
@@ -451,7 +449,7 @@ public class StatsHandler : MonoBehaviour
 
         return effects;
     }
-    private int GetTotalStatChange(Stat stat) {
+    public int GetTotalStatChange(Stat stat) {
         int change = 0;
 
         Dictionary<string, int> statBuildableEffects = GetStatBuildableEffects(stat);
@@ -478,7 +476,7 @@ public class StatsHandler : MonoBehaviour
 
 public enum Stat {
     None,
-    Environment,
-    Happiness,
-    Economy
+    Materials,
+    Food,
+    Gold
 }

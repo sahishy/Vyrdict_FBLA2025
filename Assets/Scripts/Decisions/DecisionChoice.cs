@@ -8,80 +8,85 @@ using Unity.Collections;
 
 public class DecisionChoice : MonoBehaviour
 {
-    public Decision decision;
+    public ChoiceData choiceData;
 
     [Header("References")]
-    [SerializeField] private TMP_Text decisionName;
     [SerializeField] private Image buildableIcon;
-    [SerializeField] private TMP_Text buildableAmount;
-    [SerializeField] private TMP_Text buildableDescription;
-    [SerializeField] private Transform environmentBarHolder;
-    [SerializeField] private Transform happinessBarHolder;
-    [SerializeField] private Transform economyBarHolder;
+    [SerializeField] private TMP_Text buildableName;
+    //[SerializeField] private TMP_Text buildableAmount;
+    [SerializeField] private TMP_Text choiceDescription;
+    [SerializeField] private Transform environmentHolder;
+    [SerializeField] private Transform happinessHolder;
+    [SerializeField] private Transform economyHolder;
 
-    [SerializeField] private GameObject statBarPrefab;
     private Color32 positiveColor = new Color32(195, 250, 216, 255);
     private Color32 negativeColor = new Color32(245, 201, 196, 255);
     private Color32 disabledColor = new Color32(0, 0, 0, 50);
 
-    public void Initialize(Decision _decision, int index)
+    public void Initialize(ChoiceData _choiceData, int index)
     {
-        decision = _decision;
+        choiceData = _choiceData;
 
-        decisionName.text = decision.name;
-        buildableIcon.sprite = decision.buildable.icon;
-        buildableAmount.text = decision.amount.ToString();
-        buildableDescription.text = decision.buildable.description;
+        Buildable buildable = PlacementHandler.instance.GetBuildable(choiceData.buildable);
+        buildableIcon.sprite = buildable.icon;
+        buildableName.text = buildable.name;
+        choiceDescription.text = choiceData.description;
         
-        //CREATE EFFECT BARS
-        CreateEffectBar(environmentBarHolder, decision.buildable.environmentEffect);
-        CreateEffectBar(happinessBarHolder, decision.buildable.happinessEffect);
-        CreateEffectBar(economyBarHolder, decision.buildable.economyEffect);
+        //update stat effects
+        if(choiceData.stat1 == "Environment" || choiceData.stat2 == "Environment") {
+            if(choiceData.stat1 == "Environment") {
+                environmentHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
+                environmentHolder.gameObject.SetActive(true);
+            } else {
+                environmentHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
+                environmentHolder.gameObject.SetActive(true);
+            }
+        }
+        if(choiceData.stat1 == "Happiness" || choiceData.stat2 == "Happiness") {
+            if(choiceData.stat1 == "Happiness") {
+                happinessHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
+                happinessHolder.gameObject.SetActive(true);
+            } else {
+                happinessHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
+                happinessHolder.gameObject.SetActive(true);
+            }
+        }
+        if(choiceData.stat1 == "Economy" || choiceData.stat2 == "Economy") {
+            if(choiceData.stat1 == "Economy") {
+                economyHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
+                economyHolder.gameObject.SetActive(true);
+            } else {
+                economyHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
+                economyHolder.gameObject.SetActive(true);
+            }
+        }
 
         //START ANIMATION
         StartCoroutine(FadeSequence(index));
-    }
-    private void CreateEffectBar(Transform parent, int value) {
-        for(int i = -3; i <= 3; i++) {
-            Image bar = Instantiate(statBarPrefab, parent).GetComponent<Image>();
-            Color32 color = disabledColor;
-
-            if(i == 0) {
-                color = new Color32(255, 255, 255, 255);
-            } else if(i < 0 && i >= value) {
-                color = negativeColor;
-            } else if(i > 0 && i <= value) {
-                color = positiveColor;
-            }
-
-            bar.color = color;
-        }
     }
     private IEnumerator FadeSequence(int index) {
         yield return new WaitForSeconds(index * 2f);
 
         gameObject.GetComponent<CanvasGroup>().DOFade(1, 0.5f);
 
-        //SET HOLDERS TO ACTIVE TO REFRESH CONTEN SIZE FITTER
+        if(choiceData.stat1 == "Environment" || choiceData.stat2 == "Environment") {
+            environmentHolder.GetComponent<ContentSizeFitter>().enabled = true;         
+        }
+        if(choiceData.stat1 == "Happiness" || choiceData.stat2 == "Happiness") {
+            happinessHolder.GetComponent<ContentSizeFitter>().enabled = true;        
+        }
+        if(choiceData.stat1 == "Economy" || choiceData.stat2 == "Economy") {
+            economyHolder.GetComponent<ContentSizeFitter>().enabled = true;
+        }
 
-        float _delay = 0.5f;
-        float _animationTime = 0.5f;
-
-        yield return new WaitForSeconds(_delay);
-        environmentBarHolder.parent.GetComponent<ContentSizeFitter>().enabled = true;
-        environmentBarHolder.parent.GetComponent<CanvasGroup>().DOFade(1, _animationTime);
-
-        yield return new WaitForSeconds(_delay);
-        happinessBarHolder.parent.GetComponent<ContentSizeFitter>().enabled = true;
-        happinessBarHolder.parent.GetComponent<CanvasGroup>().DOFade(1, _animationTime);
-
-        yield return new WaitForSeconds(_delay);
-        economyBarHolder.parent.GetComponent<ContentSizeFitter>().enabled = true;
-        economyBarHolder.parent.GetComponent<CanvasGroup>().DOFade(1, _animationTime);
+        //reset main content size fitter
+        environmentHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        yield return null;
+        environmentHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.MinSize;
     }
 
     public void ButtonClick() {
-        DecisionHandler.instance.SelectChoice(decision);
+        DecisionHandler.instance.SelectChoice(choiceData);
     }
     public void ButtonEnter() {
         transform.DOScale(Vector3.one * 1.05f, 0.5f);

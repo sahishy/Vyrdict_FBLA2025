@@ -93,12 +93,12 @@ public class ItemEditor : Editor
             script.negativeRequiredConnectionStatusText = EditorGUILayout.TextField("Negative Status", script.negativeRequiredConnectionStatusText);
         }
 
-        if(script.buildableFocus == Stat.Environment) {
+        if(script.buildableFocus == Stat.Materials) {
             script.pollutionInfluence = (int)EditorGUILayout.Slider("Pollution Influence", script.pollutionInfluence, 0, 3);
             script.pollutionInfluenceStatusText = EditorGUILayout.TextField("Status", script.pollutionInfluenceStatusText);
-        } else if(script.buildableFocus == Stat.Happiness) {
+        } else if(script.buildableFocus == Stat.Food) {
             script.residents = (int)EditorGUILayout.Slider("Residents", script.residents, 0, 3);
-        } else if(script.buildableFocus == Stat.Economy) {
+        } else if(script.buildableFocus == Stat.Gold) {
             script.requiredCustomers = (int)EditorGUILayout.Slider("Required Customers", script.requiredCustomers, 0, 3);
             script.positiveRequiredCustomersStatusText = EditorGUILayout.TextField("Positive Status", script.positiveRequiredCustomersStatusText);
             script.negativeRequiredCustomersStatusText = EditorGUILayout.TextField("Negative Status", script.negativeRequiredCustomersStatusText);

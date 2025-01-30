@@ -13,9 +13,9 @@
                 },
                 "choices": {
                     "type": "object",
-                    "required": ["1", "2", "3"],
+                    "required": ["choice1", "choice2", "choice3"],
                     "properties": {
-                        "1": {
+                        "choice1": {
                             "type": "object",
                             "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
                             "properties": {
@@ -27,7 +27,7 @@
                                 "buildable": {"type": "string"}
                             }
                         },
-                        "2": {
+                        "choice2": {
                             "type": "object",
                             "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
                             "properties": {
@@ -39,7 +39,7 @@
                                 "buildable": {"type": "string"}
                             }
                         },
-                        "3": {
+                        "choice3": {
                             "type": "object",
                             "required": ["description", "stat1", "effect1", "stat2", "effect2", "buildable"],
                             "properties": {

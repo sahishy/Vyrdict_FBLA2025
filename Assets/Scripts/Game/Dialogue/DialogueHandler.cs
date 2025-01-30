@@ -15,6 +15,7 @@ public class DialogueHandler : MonoBehaviour
     [Header("References")]
     [SerializeField] private RectTransform dialoguePanel;
     [SerializeField] private TMP_Text dialogueText;
+    [SerializeField] private RectTransform deckHolder;
 
     private Coroutine dialogueTextAnimationCoroutine;
 
@@ -35,6 +36,8 @@ public class DialogueHandler : MonoBehaviour
 
             dialoguePanel.parent.gameObject.SetActive(true);
             dialoguePanel.DOAnchorPos(new Vector2(0, 40), 0.5f).SetEase(Ease.InBack);
+
+            deckHolder.DOAnchorPos(new Vector2(0, -75), 0.5f).SetEase(Ease.InBack);
         }
         
     }
@@ -73,6 +76,7 @@ public class DialogueHandler : MonoBehaviour
         dialoguePanel.DOAnchorPos(new Vector2(0, -60), 0.5f).SetEase(Ease.InBack).OnComplete(() => {
             dialoguePanel.parent.gameObject.SetActive(false);
         });
+        deckHolder.DOAnchorPos(new Vector2(0, 25), 0.5f).SetEase(Ease.OutBack);
     }
 
     private IEnumerator DialogueTextAnimation(string dialogue) {

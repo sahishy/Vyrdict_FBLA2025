@@ -9,6 +9,8 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
     public static TileDisplayHandler instance;
     private GridTile displayedTile = null;
 
+    [SerializeField] private Vector2 targetPos;
+
     [Header("References")]
     [SerializeField] private GameObject display;
     [SerializeField] private RectTransform displayPanel;
@@ -37,7 +39,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         //end all current UI animations
         DOTween.Kill(displayPanel);
         if(panelToggling) {
-            displayPanel.anchoredPosition = new Vector2(0, 40);
+            displayPanel.anchoredPosition = targetPos;
             panelToggling = false;            
         }
         displayPanel.transform.DOPunchScale(Vector3.one * 0.02f, 0.1f).SetId(displayPanel);
@@ -79,7 +81,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         panelToggling = true;
         if(!display.activeSelf) {
             display.SetActive(true);
-            displayPanel.DOAnchorPos(new Vector2(0, 40), 0.5f).SetEase(Ease.OutBack).OnComplete(() => {
+            displayPanel.DOAnchorPos(targetPos, 0.5f).SetEase(Ease.OutBack).OnComplete(() => {
                 panelToggling = false;
             }).SetId(displayPanel);
         }
@@ -127,7 +129,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         }
 
         panelToggling = true;
-        displayPanel.DOAnchorPos(new Vector2(0, 30), 0.2f).OnComplete(() => {
+        displayPanel.DOAnchorPos(targetPos - new Vector2(0, 10), 0.2f).OnComplete(() => {
             panelToggling = false;
         });
         GameHandler.instance.currentFocusedAnimatable = this;
@@ -139,7 +141,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         }
 
         panelToggling = true;
-        displayPanel.DOAnchorPos(new Vector2(0, 40), 0.2f).OnComplete(() => {
+        displayPanel.DOAnchorPos(targetPos, 0.2f).OnComplete(() => {
             panelToggling = false;
         });
     }

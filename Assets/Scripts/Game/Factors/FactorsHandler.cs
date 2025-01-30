@@ -65,17 +65,17 @@ public class FactorsHandler : MonoBehaviour
         //get a random factor that is the given type
         possibleFactors = allFactors.Where(x => x.factorType == type).ToList();
 
-        int environment = StatsHandler.instance.GetStat(Stat.Environment);
-        int happiness = StatsHandler.instance.GetStat(Stat.Happiness);
-        int economy = StatsHandler.instance.GetStat(Stat.Economy);
+        int environment = StatsHandler.instance.GetStat(Stat.Materials);
+        int happiness = StatsHandler.instance.GetStat(Stat.Food);
+        int economy = StatsHandler.instance.GetStat(Stat.Gold);
 
         //list of best factors based on player's situation
         List<Factor> bestFactors = new List<Factor>();
 
         foreach(Factor factor in possibleFactors) {
-            int happinessChange = factor.statEffect == Stat.Happiness ? factor.statEffectValue : 0;
-            int economyChange = factor.statEffect == Stat.Economy ? factor.statEffectValue : 0;
-            int environmentChange = factor.statEffect == Stat.Environment ? factor.statEffectValue : 0;
+            int happinessChange = factor.statEffect == Stat.Food ? factor.statEffectValue : 0;
+            int economyChange = factor.statEffect == Stat.Gold ? factor.statEffectValue : 0;
+            int environmentChange = factor.statEffect == Stat.Materials ? factor.statEffectValue : 0;
 
             if(happiness < 30 && happinessChange > 0) {
                 bestFactors.Add(factor);

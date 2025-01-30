@@ -26,7 +26,11 @@ public class InventoryItemUI : MonoBehaviour, Animatable
     }
 
     public void ButtonClick() {
-        PlacementHandler.instance.EnterPlacementMode(buildable);
+        Card newCard = new Card();
+        newCard.buildable = buildable;
+        newCard.buildableMaterialCost = 0;
+        newCard.buildableGoldCost = 0;
+        PlacementHandler.instance.EnterPlacementMode(newCard);
 
         transform.DOScale(Vector3.one, 0.2f);
     }
