@@ -27,14 +27,10 @@ public class DecisionHandler : MonoBehaviour
     [SerializeField] private TMP_Text eventEffect;
 
     [SerializeField] private RectTransform weekStatsHolder;
-    [SerializeField] private Image environmentBar;
-    [SerializeField] private Image happinessBar;
-    [SerializeField] private Image economyBar;
-
     [SerializeField] private RectTransform weekStatsTextHolder;
-    [SerializeField] private TMP_Text environmentText;
-    [SerializeField] private TMP_Text happinessText;
-    [SerializeField] private TMP_Text economyText;
+    [SerializeField] private TMP_Text materialsText;
+    [SerializeField] private TMP_Text foodText;
+    [SerializeField] private TMP_Text goldText;
 
     [SerializeField] private GameObject decisionChoiceHolder;
     [SerializeField] private GameObject decisionChoicePrefab;
@@ -164,28 +160,24 @@ public class DecisionHandler : MonoBehaviour
         float randomHappinessAnimationTime = animationTime + Random.Range(0f, 1f);
         float randomEconomyAnimationTime = animationTime + Random.Range(0f, 1f);
 
-        environmentBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Materials) / 100f, randomEnvironmentAnimationTime).SetEase(Ease.OutExpo);
-        happinessBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Food) / 100f, randomHappinessAnimationTime).SetEase(Ease.OutExpo);
-        economyBar.DOFillAmount(StatsHandler.instance.GetStat(Stat.Gold) / 100f, randomEconomyAnimationTime).SetEase(Ease.OutExpo);
-
         //show raw stat values, do counting animation
         float _environmentValue = 0f;
         float _happinessValue = 0f;
         float _economyValue = 0f;
 
         DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Materials), randomEnvironmentAnimationTime)
-        .SetEase(Ease.OutExpo).OnUpdate(() => environmentText.text = Mathf.RoundToInt(_environmentValue).ToString());
+        .SetEase(Ease.OutExpo).OnUpdate(() => materialsText.text = Mathf.RoundToInt(_environmentValue).ToString());
         DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.GetStat(Stat.Food), randomHappinessAnimationTime)
-        .SetEase(Ease.OutExpo).OnUpdate(() => happinessText.text = Mathf.RoundToInt(_happinessValue).ToString());
+        .SetEase(Ease.OutExpo).OnUpdate(() => foodText.text = Mathf.RoundToInt(_happinessValue).ToString());
         DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.GetStat(Stat.Gold), randomEconomyAnimationTime)
-        .SetEase(Ease.OutExpo).OnUpdate(() => economyText.text = Mathf.RoundToInt(_economyValue).ToString());
+        .SetEase(Ease.OutExpo).OnUpdate(() => goldText.text = Mathf.RoundToInt(_economyValue).ToString());
 
         yield return new WaitForSeconds(3f);
 
         //show status color of raw stats (red bad, white neutral, green good)
-        environmentText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Materials)), 1f);
-        happinessText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Food)), 1f);
-        economyText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Gold)), 1f);
+        materialsText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Materials)), 1f);
+        foodText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Food)), 1f);
+        goldText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Gold)), 1f);
 
         //give extra time to look at stats
         yield return new WaitForSeconds(2f);
@@ -231,26 +223,23 @@ public class DecisionHandler : MonoBehaviour
         weekCounter.alpha = 1f;
 
         label.alpha = 0;
-        label.text = "Here are your stats for the week:";
+        label.text = "Here are your resources for the week:";
         label.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 75);
         scenario.text = "";
 
         weekStatsHolder.anchoredPosition = new Vector2(0, 0);
         weekStatsHolder.GetComponent<CanvasGroup>().alpha = 0;
         weekStatsHolder.transform.localScale = Vector3.one;
-        environmentBar.fillAmount = 0;
-        happinessBar.fillAmount = 0;
-        economyBar.fillAmount = 0;
 
         weekStatsTextHolder.anchoredPosition = new Vector2(0, -75);
         weekStatsTextHolder.GetComponent<CanvasGroup>().alpha = 0;
         weekStatsTextHolder.transform.localScale = Vector3.one;
-        environmentText.text = "";
-        environmentText.color = Color.white;
-        happinessText.text = "";
-        happinessText.color = Color.white;
-        economyText.text = "";
-        economyText.color = Color.white;
+        materialsText.text = "";
+        materialsText.color = Color.white;
+        foodText.text = "";
+        foodText.color = Color.white;
+        goldText.text = "";
+        goldText.color = Color.white;
 
         foreach(Transform child in decisionChoiceHolder.transform) {
             Destroy(child.gameObject);

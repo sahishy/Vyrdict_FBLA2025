@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: Windmill Blueprint
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Blueprint for windmill
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A blueprint for a future Windmill.
+  _materialsEffect: -2
+  _foodEffect: 0
+  _goldEffect: -2
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 574716239d11e4505a6f830d10bb9ba7, type: 2}
   _tile: {fileID: 6691888430365684838, guid: 9de137e56c4d947ec8b9f6759d20eb97, type: 3}

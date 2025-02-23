@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: Blacksmith
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: d0f7acbdfd8d242278516695223a33c5, type: 3}
-  _description: A place where the finest tools are traded.
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 3
+  _description: A place where materials are refined into valuable commodities. Poll
+  _materialsEffect: 3
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 1
+  _buildableFocus: 1
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 1
+  _positivePollutionInfluenceStatusText: Commodities are being produced with no issues.
+  _negativePollutionInfluenceStatusText: High pollution is leading to less valuable
+    materials.
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
+  _upgrade: {fileID: 0}
   _tile: {fileID: 7543186247169416733, guid: 190dc19ea504e48b1a8b095465b629e7, type: 3}

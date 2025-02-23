@@ -34,6 +34,7 @@ public class PlacementHandler : MonoBehaviour, Animatable
     [SerializeField] private Transform placeButtonFocusHolder;
     [SerializeField] private CanvasGroup placeButton;
     [SerializeField] private Transform rotateButton;
+    [SerializeField] private Transform cancelButton;
     [SerializeField] private Material positiveHighlightMaterial;
     [SerializeField] private Material highlightMaterial;
     [SerializeField] private Material negativeHighlightMaterial;
@@ -65,16 +66,21 @@ public class PlacementHandler : MonoBehaviour, Animatable
     public void EnterPlacementMode(Card card) {
         inPlacementMode = true;
         currentCard = card;
-        currentBuildable = card.buildable;
+        currentBuildable = card.cardType == CardType.Buildable ? card.buildable : card.upgrade;
 
         Camera.main.DOFieldOfView(Camera.main.fieldOfView - 10, 0.5f);
 
         //Toggle all active UI
-        GameHandler.instance.currentFocusedAnimatable?.AnimatableExit();
+        if(GameHandler.instance.currentFocusedAnimatable != null) {
+            GameHandler.instance.currentFocusedAnimatable.AnimatableExit();
+        }
         TileDisplayHandler.instance.HideDisplay();
         DialogueHandler.instance.CloseDialogue();
 
         deckHolder.DOAnchorPos(new Vector2(0, -75), 0.5f).SetEase(Ease.InBack);
+
+        //Freeze Time
+        GameHandler.instance.ToggleTimeFreeze(true);
 
         //Placement Visuals
         TogglePlacementUI(true);
@@ -90,6 +96,9 @@ public class PlacementHandler : MonoBehaviour, Animatable
         currentRotation = rotations[rotationStep];
 
         deckHolder.DOAnchorPos(new Vector2(0, 25), 0.5f).SetEase(Ease.InBack);
+
+        //Unfreeze Time
+        GameHandler.instance.ToggleTimeFreeze(false);
 
         DestroyGhost();
         TogglePlacementUI(false);
@@ -353,8 +362,19 @@ public class PlacementHandler : MonoBehaviour, Animatable
         return unoccupiedTileAndNoUpgrade || occupiedTileAndUpgrade;
     }
     //returns a buildables previous upgrade (ex. big house -> small house, rock -> null)
-    private Buildable GetPreviousUpgrade(Buildable buildable) {
-        return Resources.LoadAll<Buildable>("Buildables").FirstOrDefault(x => x.upgrade != null && x.upgrade.name == buildable.name);
+    public Buildable GetPreviousUpgrade(Buildable buildable) {
+        List<Buildable> allBuildables = Resources.LoadAll<Buildable>("Buildables").ToList();
+        Debug.Log($"All Buildables: {allBuildables.Count}");
+        List<Buildable> focusedBuildables = allBuildables.Where(x => x.upgrade != null).ToList();
+        Debug.Log($"Focused Buildables 1: {focusedBuildables.Count}");
+        Debug.Log($"Provided Buildable Is Null: {buildable == null}");
+        focusedBuildables = focusedBuildables.Where(x => x.upgrade != null && x.upgrade.name == buildable.name).ToList();
+        Debug.Log($"Focused Buildables 2: {focusedBuildables.Count}");
+        if(focusedBuildables.Count > 0) {
+            return focusedBuildables[0];
+        } else {
+            return null;
+        }
     }
     //returns a buildable based on a provided name
     public Buildable GetBuildable(string name) {
@@ -375,8 +395,21 @@ public class PlacementHandler : MonoBehaviour, Animatable
         rotateButton.DOScale(1f, 0.2f);
     }
 
+    public void CancelButtonClick() {
+        ExitPlacementMode();
+        cancelButton.localScale = Vector3.one;
+    }
+    public void CancelButtonEnter() {
+        GameHandler.instance.currentFocusedAnimatable = this;
+        cancelButton.DOScale(1.2f, 0.2f);
+    }
+    public void CancelButtonExit() {
+        cancelButton.DOScale(1f, 0.2f);
+    }
+
     public void AnimatableExit() {
         RotateButtonExit();
+        CancelButtonExit();
     }
 
     private IEnumerator StartPlaceButtonFocusAnimation() {

@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: Tavern Blueprint
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Blueprint for tavern
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 0
-  _upgrade: {fileID: 11400000}
+  _description: A blueprint for a future Tavern.
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
+  _upgrade: {fileID: 11400000, guid: 8d722b48182a2466f9dc1523f59336a0, type: 2}
   _tile: {fileID: 1893424791650988745, guid: 7f5d61e08e6974fdda436ddd523ff711, type: 3}

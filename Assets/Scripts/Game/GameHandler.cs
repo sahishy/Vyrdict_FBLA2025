@@ -25,6 +25,7 @@ public class GameHandler : MonoBehaviour, Animatable
 
     [Header("Animation")]
     public Animatable currentFocusedAnimatable = null;
+    [SerializeField] private Gradient timeColor;
 
     [Header("References")]
     [SerializeField] private CanvasGroup gameplayScreen;
@@ -33,6 +34,7 @@ public class GameHandler : MonoBehaviour, Animatable
     [SerializeField] private TMP_Text weekText;
     [SerializeField] private TMP_Text fateText;
     [SerializeField] private Image fateBar;
+    [SerializeField] private Transform mainLight;
 
     private bool timeInformationActive = false;
     private int statsInformationIndex = -1;
@@ -55,29 +57,30 @@ public class GameHandler : MonoBehaviour, Animatable
         //INTRO ANIMATION
         Invoke(nameof(IntroAnimation), 1f);
 
-        //START WEEK
-        //make sure map is generated before starting week, events depend on the map
-        StartWeek();
+        //DISABLE PLAYING CARDS (prevent player from using cards immediately)
+        //CardsHandler.instance.canPlay = false;
 
         //UPDATE UI
         UpdateUI();
         StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>(), 1f));
 
+        //UPDATE TIME LIGHTING
+        UpdateTimeLighting();
+
         //STARTING PROCESS - create factors, two starter houses, cutscene, dialogue
 
         //STARTING FACTORS
         FactorsHandler.instance.AddStartingEvents();
+
+        //show starting dialogue scene
+        StartCoroutine(IntroDialogue());
         
-        //show the starting emote for the two houses
-        ConnectionGroup targetNeighborsGroup = ConnectionsHandler.instance.connectionGroups.FirstOrDefault(x => x.connection.name == "Neighbors");
-        EmoteHandler.instance.CreateEmote(Emote.Sad, targetNeighborsGroup, 5f);
-        //animation for focusing on two houses
-        PlayerController.instance.CameraZoom(GridHandler.instance.GetAverageTileListPosition(targetNeighborsGroup.tiles), 4f, 2f, 2f, 3f);
-        
-        //show starting dialogue
-        yield return new WaitForSeconds(5f);
-        DialogueHandler.instance.AddDialogue("This is your community. They feel cramped living in such a small town.");
-        DialogueHandler.instance.AddDialogue("The population won't fit in these two tents for long. The community is growing at a rapid rate.");
+        //START WEEK
+
+        yield return new WaitForSeconds(2f);
+
+        //make sure map is generated before starting week, events depend on the map
+        StartWeek();
     }
 
     void Update() {
@@ -97,10 +100,16 @@ public class GameHandler : MonoBehaviour, Animatable
         }
 
         //updates the day bar, if time is frozen then the bar is not updated for visual purposes
-        if(!timeFrozen) {
-            dayBar.fillAmount = dayTimer / dayDuration;
-        }
-        
+        dayBar.fillAmount = dayTimer / dayDuration;
+
+        //time animation
+        UpdateTimeLighting();
+
+    }
+    private void UpdateTimeLighting() {
+        //time animation
+        mainLight.rotation = Quaternion.Euler((dayTimer / dayDuration) * 360, -30, 0);
+        RenderSettings.ambientLight = timeColor.Evaluate(dayTimer / dayDuration) * 1.7f;
     }
 
     //Called at the end of each day
@@ -122,6 +131,7 @@ public class GameHandler : MonoBehaviour, Animatable
         //FactorsHandler.instance.TryAddRandomFactor();
 
         //GAME LOOP - change stats
+        StatsHandler.instance.ConstantStatChange();
         StatsHandler.instance.UpdateStats();
 
         //GAME LOOP - check if player lost
@@ -146,7 +156,7 @@ public class GameHandler : MonoBehaviour, Animatable
 
     //Called at the start of each week by DecisionHandler
     public void StartWeek() {
-        ToggleTimeFreeze(false);
+        StartCoroutine(CardsHandler.instance.EnterDrawPhase());
     }
 
     //Fate functionality, decreases fate timer at the end of each day, ends game if the fate timer is at zero
@@ -197,11 +207,11 @@ public class GameHandler : MonoBehaviour, Animatable
     private void IntroAnimation() {
         gameplayScreen.DOFade(1f, 3f);
 
-        StartCoroutine(IntroStormAnimation());
+        //StartCoroutine(IntroStormAnimation());
     }
     private IEnumerator IntroStormAnimation() {
         GameObject.Find("Rain").SetActive(true);
-        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(100, 150, 150, 255), 3);
+        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(60, 170, 170, 255), 3);
         DOTween.To(() => RenderSettings.fogStartDistance, x => RenderSettings.fogStartDistance = x, 0, 3);
         DOTween.To(() => RenderSettings.fogEndDistance, x => RenderSettings.fogEndDistance = x, 30, 3);
 
@@ -209,9 +219,22 @@ public class GameHandler : MonoBehaviour, Animatable
 
         GameObject.Find("Rain").transform.GetChild(0).GetComponent<ParticleSystem>().Stop();
 
-        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(0, 255, 255, 255), 3);
+        DOTween.To(() => RenderSettings.fogColor, x => RenderSettings.fogColor = x, new Color32(0, 153, 178, 255), 3);
         DOTween.To(() => RenderSettings.fogStartDistance, x => RenderSettings.fogStartDistance = x, 20, 3);
         DOTween.To(() => RenderSettings.fogEndDistance, x => RenderSettings.fogEndDistance = x, 50, 3);
+    }
+
+    private IEnumerator IntroDialogue() {
+        yield return new WaitUntil(() => dayTimer > 5f);
+
+        //show the starting emote for the two houses
+        ConnectionGroup targetNeighborsGroup = ConnectionsHandler.instance.connectionGroups.FirstOrDefault(x => x.connection.name == "Neighbors");
+        EmoteHandler.instance.CreateEmote(Emote.Sad, targetNeighborsGroup);
+        //animation for focusing on two houses
+        PlayerController.instance.CameraZoom(GridHandler.instance.GetAverageTileListPosition(targetNeighborsGroup.tiles), 4f, 2f, 2f);
+        
+        DialogueHandler.instance.AddDialogue("This is your community. They feel cramped living in such a small town.");
+        DialogueHandler.instance.AddDialogue("The population won't fit in these two tents for long. The community is growing at a rapid rate.");
     }
 
     //--------------------------------------UI--------------------------------------

@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: Market Blueprint
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Blueprint for market
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A blueprint for a future Market.
+  _materialsEffect: -2
+  _foodEffect: 0
+  _goldEffect: -2
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 1a4af4e213a0e4f5aa2c3037edacc992, type: 2}
   _tile: {fileID: 4612013405035980765, guid: f23919a1aa8a1434cb0afad53776b054, type: 3}

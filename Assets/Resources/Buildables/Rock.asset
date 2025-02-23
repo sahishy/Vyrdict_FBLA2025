@@ -13,9 +13,21 @@ MonoBehaviour:
   m_Name: Rock
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Rock
-  _environmentEffect: 0
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A simple rock that has potential as a future mine.
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 0
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: d85e743d4a846471599047284e5de861, type: 2}
   _tile: {fileID: 3773263153670974738, guid: ae523645962574807b14fa63715ddca9, type: 3}

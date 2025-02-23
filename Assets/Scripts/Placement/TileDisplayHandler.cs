@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -53,14 +55,33 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         displayedTile = tile;
 
         //--GET STATUS--
-        string status = "";
+        List<string> statusTexts = new List<string>();
+        //connection
         if(tile.currentBuildable.requiredConnection != null) {
             if(ConnectionsHandler.instance.RequiredConnectionMet(tile)) {
-                status = tile.currentBuildable.positiveRequiredConnectionStatusText;
+                statusTexts.Add(tile.currentBuildable.positiveRequiredConnectionStatusText);
             } else {
-                status = tile.currentBuildable.negativeRequiredConnectionStatusText;
+                statusTexts.Add(tile.currentBuildable.negativeRequiredConnectionStatusText);
             }
         }
+        //customers -- error here
+        if(CommunitiesHandler.instance.GetCommunity(tile).population >= CommunitiesHandler.instance.GetCommunity(tile).requiredPopulation) {
+            statusTexts.Add(tile.currentBuildable.positiveRequiredCustomersStatusText);
+        } else {
+            statusTexts.Add(tile.currentBuildable.negativeRequiredCustomersStatusText);
+        }
+        //pollution
+        if(StatsHandler.instance.GetPollutionOutput(tile.currentBuildable) <= 1) {
+            statusTexts.Add(tile.currentBuildable.positivePollutionInfluenceStatusText);
+        } else {
+            statusTexts.Add(tile.currentBuildable.negativePollutionInfluenceStatusText);
+        }
+        //default status if no status texts
+        if(statusTexts.Count == 0) {
+            statusTexts.Add("Materials are being used as the building waits for an upgrade.");
+        }
+        //combine
+        string status = string.Join(" ", statusTexts.ToArray());
 
         //---DISPLAY UI---
         buildableIcon.sprite = tile.currentBuildable.icon;
@@ -81,7 +102,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
         panelToggling = true;
         if(!display.activeSelf) {
             display.SetActive(true);
-            displayPanel.DOAnchorPos(targetPos, 0.5f).SetEase(Ease.OutBack).OnComplete(() => {
+            displayPanel.DOAnchorPos(targetPos, 0.2f).SetEase(Ease.OutSine).OnComplete(() => {
                 panelToggling = false;
             }).SetId(displayPanel);
         }
@@ -109,7 +130,7 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
 
         //closing animation
         panelToggling = true;
-        displayPanel.DOAnchorPos(new Vector2(0, displayPanel.sizeDelta.y * -1f), 0.5f).SetEase(Ease.InBack).OnComplete(() => {
+        displayPanel.DOAnchorPos(new Vector2(0, displayPanel.sizeDelta.y * -1f), 0.2f).SetEase(Ease.InSine).OnComplete(() => {
             display.SetActive(false);
             panelToggling = false;
         });

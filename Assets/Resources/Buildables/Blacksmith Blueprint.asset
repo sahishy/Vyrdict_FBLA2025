@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: Blacksmith Blueprint
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Blueprint for blacksmith
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A blueprint for a future Blacksmith.
+  _materialsEffect: -2
+  _foodEffect: 0
+  _goldEffect: -2
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 20c0150f1b0fc49368dafd08a6152738, type: 2}
   _tile: {fileID: 1055003026796936584, guid: a92fd97b132af4ff4947aedf12188b92, type: 3}

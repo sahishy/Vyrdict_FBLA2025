@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: Market
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: incomplete
-  _environmentEffect: -2
-  _happinessEffect: 1
-  _economyEffect: 3
+  _description: A marketplace where only the best resources are traded, requiring
+    at least 3 customers to be profitable.
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 0
+  _buildableFocus: 3
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 3
+  _positiveRequiredCustomersStatusText: There is flourishing trade.
+  _negativeRequiredCustomersStatusText: There aren't enough customers to trade with.
+  _upgrade: {fileID: 0}
   _tile: {fileID: 5222996578062732124, guid: bcc1982f7bfca458ca3e57b78daa2bcc, type: 3}

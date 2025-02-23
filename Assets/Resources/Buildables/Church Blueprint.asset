@@ -13,9 +13,19 @@ MonoBehaviour:
   m_Name: Church Blueprint
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Blueprint for church
-  _environmentEffect: -2
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A blueprint for a future Church.
+  _materialsEffect: -2
+  _foodEffect: 0
+  _goldEffect: -2
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 01dc8afbbaed94ef6b43cc3d0fbaa960, type: 2}
   _tile: {fileID: 6927477947329141703, guid: 2d418f8dfecc943488b397983d9eb6cf, type: 3}

@@ -14,7 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: incomplete
-  _environmentEffect: 1
-  _happinessEffect: 0
-  _economyEffect: 0
+  _materialsEffect: 0
+  _foodEffect: 1
+  _goldEffect: 0
+  _pollutable: 0
+  _buildableFocus: 2
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 1
+  _positivePollutionInfluenceStatusText: The clean water is keeping the community
+    hydrated.
+  _negativePollutionInfluenceStatusText: High pollution has led to contaminated water.
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
+  _upgrade: {fileID: 0}
   _tile: {fileID: 3280555211037798102, guid: a35b06bfbd6654d82b457ee4e4ca313b, type: 3}

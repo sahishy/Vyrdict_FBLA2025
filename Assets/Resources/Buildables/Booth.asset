@@ -13,19 +13,22 @@ MonoBehaviour:
   m_Name: Booth
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: A tiny stand where basic goods are sold.
-  _environmentEffect: 0
-  _happinessEffect: 0
-  _economyEffect: 1
+  _description: A tiny stand where basic goods are sold, requiring at least two customers
+    to be profitable.
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 0
   _buildableFocus: 3
   _requiredConnection: {fileID: 0}
   _positiveRequiredConnectionStatusText: 
   _negativeRequiredConnectionStatusText: 
   _pollutionInfluence: 0
-  _pollutionInfluenceStatusText: 
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
   _residents: 0
-  _requiredCustomers: 1
+  _requiredCustomers: 2
   _positiveRequiredCustomersStatusText: There is flourishing trade.
-  _negativeRequiredCustomersStatusText: There is nobody to trade with.
+  _negativeRequiredCustomersStatusText: There aren't enough customers to trade with.
   _upgrade: {fileID: 11400000, guid: 019322fd6338a488c992d8593bebb9ac, type: 2}
   _tile: {fileID: 37357948918627207, guid: b3154037845094ac69b273e2704596ae, type: 3}

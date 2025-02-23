@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Manor
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 491660c365d7c448db1cb9fb7f4dd84c, type: 3}
-  _description: 'A large and spacious home where big families can live.
-
-    (Upgrades
-    from: Small Home)'
-  _environmentEffect: -3
-  _happinessEffect: 3
-  _economyEffect: 0
-  _requiredConnection: {fileID: 0}
-  _buildableType: 2
+  _description: A large and spacious home where 3 people live.
+  _materialsEffect: 0
+  _foodEffect: -3
+  _goldEffect: 0
+  _buildableFocus: 4
+  _requiredConnection: {fileID: 11400000, guid: 7a85583304ebb4fee87c36035ba1d566, type: 2}
+  _positiveRequiredConnectionStatusText: The residents are happy.
+  _negativeRequiredConnectionStatusText: The residents are lonely, they want neighbors.
   _pollutionInfluence: 0
+  _pollutionInfluenceStatusText: 
   _residents: 3
   _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 0}
   _tile: {fileID: 6082287250297484355, guid: 09e7857430abf444da3083166a93b484, type: 3}

@@ -6,7 +6,7 @@ public class Card : ScriptableObject
 {
     [SerializeField] private Sprite _icon;
     [SerializeField] private string _description;
-    [SerializeField] private bool _mustPlay;
+    [SerializeField] private CardRarity _cardRarity;
     [SerializeField] private CardType _cardType;
     //buildable card
     [SerializeField] private Buildable _buildable;
@@ -30,12 +30,15 @@ public class Card : ScriptableObject
 
     //factor card
     [SerializeField] private Factor _factor;
+    //strike card
+    [SerializeField] private Stat _strikedStat;
+    [SerializeField] private int _strikeValue;
     //crisis card
 
 
     public Sprite icon { get => _icon; set => _icon = value; }
     public string description { get => _description; set => _description = value; }
-    public bool mustPlay { get => _mustPlay; set => _mustPlay = value; }
+    public CardRarity cardRarity { get => _cardRarity; set => _cardRarity = value; }
     public CardType cardType { get => _cardType; set => _cardType = value; }
     //buildable card
     public Buildable buildable { get => _buildable; set => _buildable = value; }
@@ -59,6 +62,9 @@ public class Card : ScriptableObject
 
     //factor card
     public Factor factor { get => _factor; set => _factor = value; }
+    //strike card
+    public Stat strikedStat { get => _strikedStat; set => _strikedStat = value; }
+    public int strikeValue { get => _strikeValue; set => _strikeValue = value; }
     //crisis card
 
 }
@@ -75,13 +81,7 @@ public class CardEditor : Editor
         GUILayout.Space(16);
 
         // HEADER SECTION
-        GUILayout.BeginHorizontal();
-
-        script.icon = EditorGUILayout.ObjectField(script.icon, typeof(Sprite), false, GUILayout.Width(64), GUILayout.Height(64)) as Sprite;
-
-        GUILayout.Space(16);
         GUILayout.Label(script.name, new GUIStyle(EditorStyles.label) { fontSize = 24, fontStyle = FontStyle.Bold } );
-        GUILayout.EndHorizontal();
 
         // DESCRIPTION SECTION
         DrawHorizontalRule();
@@ -93,7 +93,7 @@ public class CardEditor : Editor
         DrawHorizontalRule();
         DrawHeader("Card");
 
-        script.mustPlay = EditorGUILayout.Toggle("Must Play", script.mustPlay);
+        script.cardRarity = (CardRarity)EditorGUILayout.EnumPopup("Card Rarity", script.cardRarity);
         script.cardType = (CardType)EditorGUILayout.EnumPopup("Card Type", script.cardType);
         
         // CARD -> BUILDABLE
@@ -144,6 +144,13 @@ public class CardEditor : Editor
             script.factor = (Factor)EditorGUILayout.ObjectField("Factor", script.factor, typeof(Factor), false);
         }
 
+        // CARD -> STRIKE
+
+        if(script.cardType == CardType.Strike) {
+            script.strikedStat = (Stat)EditorGUILayout.EnumPopup("Striked Stat", script.strikedStat);
+            script.strikeValue = EditorGUILayout.IntField("Strike Value", script.strikeValue);
+        }
+
         // CARD -> CRISIS
 
         if(script.cardType == CardType.Crisis) {
@@ -184,5 +191,16 @@ public enum CardType {
     Boost,
     Ability,
     Factor,
+    Strike,
     Crisis
+}
+
+public enum CardRarity {
+    None,
+    Risk,
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary
 }

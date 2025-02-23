@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bc1d7982e00df34daeff7538fc9f919, type: 3}
+  m_Name: Card 79
+  m_EditorClassIdentifier: 
+  _icon: {fileID: 0}
+  _description: Gain 50 food.
+  _cardRarity: 6
+  _cardType: 4
+  _buildable: {fileID: 0}
+  _buildableMaterialCost: 0
+  _buildableGoldCost: 0
+  _upgrade: {fileID: 0}
+  _upgradeMaterialCost: 0
+  _upgradeGoldCost: 0
+  _statFrom: 0
+  _statFromValue: 0
+  _statTo: 2
+  _statToValue: 0
+  _instantBoost: 1
+  _boostedStat: 2
+  _boostValue: 50
+  _boostLength: 0
+  _factor: {fileID: 0}
+  _strikedStat: 0
+  _strikeValue: 0

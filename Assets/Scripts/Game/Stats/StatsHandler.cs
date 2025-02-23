@@ -17,6 +17,9 @@ public class StatsHandler : MonoBehaviour
     [Header("Stats - Misc")]
     public int population = 0;
     public int requiredPopulation = 0;
+    
+    //the list of constant stat changes, from non-instant boost cards
+    private List<StatChange> currentStatChanges = new List<StatChange>();
 
     [Header("References")]
     [SerializeField] private TMP_Text materialsText;
@@ -36,10 +39,10 @@ public class StatsHandler : MonoBehaviour
     [SerializeField] private GameObject statChangePrefab;
     private List<GameObject> statEffects = new List<GameObject>();
     
-
-    private Color32 positiveColor = new Color32(195, 250, 216, 255);
-    private Color32 negativeColor = new Color32(245, 201, 196, 255);
-    private Color32 neutralColor = new Color32(255, 255, 255, 100);
+    [Header("Stat Colors")]
+    [SerializeField] private Color32 positiveColor = new Color32(195, 250, 216, 255);
+    [SerializeField] private Color32 negativeColor = new Color32(245, 201, 196, 255);
+    [SerializeField] private Color32 neutralColor = new Color32(255, 255, 255, 100);
 
     void Awake() {
         instance = this;
@@ -123,64 +126,70 @@ public class StatsHandler : MonoBehaviour
 
     //Returns the stat effects of a buildable based on various factors
     public (int, int, int) GetBuildableStats(Buildable buildable, GridTile tile) {
-        int environmentEffect = 0;
-        int happinessEffect = 0;
-        int economyEffect = 0;
+        int materialsEffect = 0;
+        int foodEffect = 0;
+        int goldEffect = 0;
 
-        //Check if the buildable has a required connection
-        if(buildable.requiredConnection != null) {
-            
-            bool requiredConnectionMet = ConnectionsHandler.instance.RequiredConnectionMet(tile);
-            int effectModifier = requiredConnectionMet ? 1 : -1;
+        bool hasRequiredConnection = buildable.requiredConnection != null;
+        bool meetsRequiredConnection = hasRequiredConnection ? ConnectionsHandler.instance.RequiredConnectionMet(tile) : false;
 
-            //Change stat based on whether required connection is met or not
-            switch(buildable.buildableFocus) {
-            
-                case Stat.Materials:
-                    environmentEffect += buildable.environmentEffect * effectModifier;
-                    happinessEffect = buildable.happinessEffect;
-                    economyEffect = buildable.economyEffect;
-                    break;
-                
-                case Stat.Food:
-                    environmentEffect = buildable.environmentEffect;
-                    happinessEffect += buildable.happinessEffect * effectModifier;
-                    economyEffect = buildable.economyEffect;
-                    break;
-                
-                case Stat.Gold:
-                    environmentEffect = buildable.environmentEffect;
-                    happinessEffect = buildable.happinessEffect;
-                    economyEffect += buildable.economyEffect * effectModifier;
-                    break;
-                
-            }
+        //Change output based on whether the buildable has a required connection and meets it
+        int effectModifier = hasRequiredConnection ? (meetsRequiredConnection ? 1 : -1) : 1;
 
+        //Change stat based on whether required connection is met or not
+        if(buildable.buildableFocus == Stat.Materials || buildable.buildableFocus == Stat.Food) {
+            materialsEffect += buildable.materialsEffect * effectModifier;
+            foodEffect = buildable.foodEffect * effectModifier;
+            goldEffect = buildable.goldEffect;
+        } else if(buildable.buildableFocus == Stat.Gold) {
+            materialsEffect = buildable.materialsEffect;
+            foodEffect = buildable.foodEffect;
+            goldEffect += buildable.goldEffect * effectModifier;
+        } else if(buildable.buildableFocus == Stat.Population) {
+            materialsEffect = buildable.materialsEffect;
+            foodEffect = buildable.foodEffect;
+            goldEffect = buildable.goldEffect;
         }
 
-        //If the buildable is economic, change its economic output based on a formula which considers population
-        //  ( (community's population) / (community's required population) ) * (multiplier)
-        if(buildable.buildableFocus == Stat.Gold) {
+        //If there is a required connection and it isn't met, then don't apply the focused stat changes
+        if(!hasRequiredConnection || (hasRequiredConnection && !meetsRequiredConnection)) {
+
             Community community = CommunitiesHandler.instance.GetCommunity(tile);
 
-            int population;
-            int requiredPopulation;
+            //If the buildable focuses on materials or food, change its output based on a formula
+            //  effect  *  ( (community's # of polluting buildables)  *  (buildable's pollution influence)  *  (multiplier) )
+            if(buildable.buildableFocus == Stat.Materials || buildable.buildableFocus == Stat.Food) {
+                
+                int output = GetPollutionOutput(buildable);
 
-            if(community != null) {
-                population = community.population;
-                requiredPopulation = community.requiredPopulation;
-            } else {
-                population = 0;
-                requiredPopulation = buildable.requiredCustomers;
+                //only have effects from pollution if it's at a significant level
+                if(output > 1) {
+                    if(buildable.buildableFocus == Stat.Materials) {
+                        materialsEffect *= -output;
+                    } else if(buildable.buildableFocus == Stat.Food) {
+                        foodEffect *= -output;
+                    }
+                }
+
+
             }
+            //Otherwise if the buildable focuses on gold, change its output based on a formula
+            //  effect  *  ( (community's population) / (community's required population) ) * (multiplier)
+            else if(buildable.buildableFocus == Stat.Gold) {
 
-            float multiplier = 1f;
-            int economicOutput = Mathf.FloorToInt(population / requiredPopulation * multiplier);
-            
-            economyEffect += economicOutput;
+                int population = community.population;
+                int requiredPopulation = community.requiredPopulation;
+
+                float multiplier = 0.5f;
+                int output = requiredPopulation != 0 ? Mathf.FloorToInt(population / requiredPopulation * multiplier) : 0;
+                
+                goldEffect *= output;
+
+            }
+              
         }
 
-        return (environmentEffect, happinessEffect, economyEffect);
+        return (materialsEffect, foodEffect, goldEffect);
     }
 
     //Method for changing a stat directly
@@ -196,12 +205,49 @@ public class StatsHandler : MonoBehaviour
         StatChangeAnimation(stat, amount);
     }
 
+    //Creates a constant stat change, normally created by cards
+    public void CreateConstantStatChange(Stat stat, int change, int timeLeft) {
+        StatChange newStatChange = new StatChange(stat, change, timeLeft);
+
+        Debug.Log($"Created {newStatChange.stat} by {newStatChange.change}. {newStatChange.timeLeft} days left.");
+        ChangeStat(newStatChange.stat, newStatChange.change);
+
+        currentStatChanges.Add(newStatChange);
+    }
+
+    //Constant stat changes, called at the end of each day
+    public void ConstantStatChange() {
+        List<StatChange> statChangesToRemove = new List<StatChange>();
+
+        foreach(StatChange statChange in currentStatChanges) {
+
+            statChange.timeLeft--;
+
+            if(statChange.timeLeft > 0) {
+                ChangeStat(statChange.stat, statChange.change);
+                Debug.Log($"Changed {statChange.stat} by {statChange.change}. {statChange.timeLeft} days left.");
+            } else {
+                Debug.Log("Removed stat change");
+                statChangesToRemove.Add(statChange);
+            }
+
+        }
+
+        foreach(StatChange statChangeToRemove in statChangesToRemove) {
+            currentStatChanges.Remove(statChangeToRemove);
+        }
+    }
+
     //-------------------------------------------------UI-------------------------------------------------
 
     private void UpdateUI() {
         materialsText.text = materials.ToString();
         foodText.text = food.ToString();
         goldText.text = gold.ToString();
+
+        materialsText.color = materials > 0 ? Color.white : negativeColor;
+        foodText.color = food > 0 ? Color.white : negativeColor;
+        goldText.color = gold > 0 ? Color.white : negativeColor;
     }
 
     public void ShowStatsInformation(int index) {
@@ -503,11 +549,34 @@ public class StatsHandler : MonoBehaviour
         List<Stat> stats = new List<Stat>((Stat[])System.Enum.GetValues(typeof(Stat)));
         return statSprites[stats.IndexOf(stat)];
     }
+    public int GetPollutionOutput(Buildable buildable) {
+        int economicBuildableCount = PlacementHandler.instance.GetPlacedBuildables().Where(x => x.buildable.pollutable).Count();
+        int pollutionInfluence = buildable.pollutionInfluence;
+        
+        float multiplier = 0.3f;
+        int output = Mathf.FloorToInt(economicBuildableCount * pollutionInfluence * multiplier);
+
+        return output;
+    }
+
 }
 
 public enum Stat {
     None,
     Materials,
     Food,
-    Gold
+    Gold,
+    Population
+}
+
+public class StatChange {
+    public Stat stat;
+    public int change;
+    public int timeLeft;
+
+    public StatChange(Stat stat, int change, int timeLeft) {
+        this.stat = stat;
+        this.change = change;
+        this.timeLeft = timeLeft;
+    }
 }

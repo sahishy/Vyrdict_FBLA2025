@@ -13,9 +13,21 @@ MonoBehaviour:
   m_Name: Hill
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Hill
-  _environmentEffect: 0
-  _happinessEffect: 0
-  _economyEffect: 0
+  _description: A plain hill that can become a mine.
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 0
+  _buildableFocus: 0
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 11400000, guid: 7dfab4c7770864992998bf61c2eaa9be, type: 2}
   _tile: {fileID: 3473885979998619933, guid: 33af0eabe5797424dbe1d65698634f45, type: 3}

@@ -14,7 +14,8 @@ def configure():
     global api_key, system_message, tool_schema
 
     load_dotenv()
-    api_key = os.getenv("api_key")
+    #api_key = os.getenv("api_key")
+    api_key = "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"
 
     with open(os.getcwd() + '/Assets/Scripts/Decisions/ML/prompt.json', 'r', encoding='utf-8') as file:
         system_message = json.load(file)["prompt"]
@@ -104,4 +105,4 @@ def get_response():
     return jsonify(response)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=1234, debug=True)

@@ -13,14 +13,21 @@ MonoBehaviour:
   m_Name: Lumbermill
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 26f35e605e5ed4540af84429071707d4, type: 3}
-  _description: A big mill that focuses on chopping down trees for trade.
-  _environmentEffect: -3
-  _happinessEffect: 0
-  _economyEffect: 2
+  _description: A big mill that focuses on chopping down trees for materials.
+  _materialsEffect: 2
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 1
+  _buildableFocus: 1
   _requiredConnection: {fileID: 0}
-  _buildableType: 0
-  _pollutionInfluence: 0
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 2
+  _positivePollutionInfluenceStatusText: Lumber is being harvested efficiently.
+  _negativePollutionInfluenceStatusText: Pollution is leading to contaminated soil.
   _residents: 0
   _requiredCustomers: 0
+  _positiveRequiredCustomersStatusText: 
+  _negativeRequiredCustomersStatusText: 
   _upgrade: {fileID: 0}
   _tile: {fileID: 4222117795289243240, guid: ea63385b72bb146ffb971a488ae8f560, type: 3}

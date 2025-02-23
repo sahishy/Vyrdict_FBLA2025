@@ -7,10 +7,11 @@ public class Buildable : ScriptableObject
     [SerializeField] private Sprite _icon;
     [SerializeField] private string _description;
     //static effects
-    [SerializeField] private int _environmentEffect;
-    [SerializeField] private int _happinessEffect;
-    [SerializeField] private int _economyEffect;
+    [SerializeField] private int _materialsEffect;
+    [SerializeField] private int _foodEffect;
+    [SerializeField] private int _goldEffect;
     //buildable type
+    [SerializeField] private bool _pollutable;
     [SerializeField] private Stat _buildableFocus;
         //buildable type > all
         [SerializeField] private Connection _requiredConnection;
@@ -18,7 +19,8 @@ public class Buildable : ScriptableObject
         [SerializeField] private string _negativeRequiredConnectionStatusText;
         //buildable type > natural
         [SerializeField] private int _pollutionInfluence;
-        [SerializeField] private string _pollutionInfluenceStatusText;
+        [SerializeField] private string _positivePollutionInfluenceStatusText;
+        [SerializeField] private string _negativePollutionInfluenceStatusText;
         //buildable type > residential
         [SerializeField] private int _residents;
         //buildable type > economic
@@ -31,10 +33,11 @@ public class Buildable : ScriptableObject
 
     public Sprite icon { get => _icon; set => _icon = value; }
     public string description { get => _description; set => _description = value; }
-    public int environmentEffect { get => _environmentEffect; set => _environmentEffect = value; }
-    public int happinessEffect { get => _happinessEffect; set => _happinessEffect = value; }
-    public int economyEffect { get => _economyEffect; set => _economyEffect = value; }
+    public int materialsEffect { get => _materialsEffect; set => _materialsEffect = value; }
+    public int foodEffect { get => _foodEffect; set => _foodEffect = value; }
+    public int goldEffect { get => _goldEffect; set => _goldEffect = value; }
     public Connection requiredConnection { get => _requiredConnection; set => _requiredConnection = value; }
+    public bool pollutable { get => _pollutable; set => _pollutable = value; }
     public Stat buildableFocus { get => _buildableFocus; set => _buildableFocus = value; }
     public int pollutionInfluence { get => _pollutionInfluence; set => _pollutionInfluence = value; }
     public int residents { get => _residents; set => _residents = value; }
@@ -43,7 +46,8 @@ public class Buildable : ScriptableObject
     public GameObject tile { get => _tile; set => _tile = value; }
     public string positiveRequiredConnectionStatusText { get => _positiveRequiredConnectionStatusText; set => _positiveRequiredConnectionStatusText = value; }
     public string negativeRequiredConnectionStatusText { get => _negativeRequiredConnectionStatusText; set => _negativeRequiredConnectionStatusText = value; }
-    public string pollutionInfluenceStatusText { get => _pollutionInfluenceStatusText; set => _pollutionInfluenceStatusText = value; }
+    public string positivePollutionInfluenceStatusText { get => _positivePollutionInfluenceStatusText; set => _positivePollutionInfluenceStatusText = value; }
+    public string negativePollutionInfluenceStatusText { get => _negativePollutionInfluenceStatusText; set => _negativePollutionInfluenceStatusText = value; }
     public string positiveRequiredCustomersStatusText { get => _positiveRequiredCustomersStatusText; set => _positiveRequiredCustomersStatusText = value; }
     public string negativeRequiredCustomersStatusText { get => _negativeRequiredCustomersStatusText; set => _negativeRequiredCustomersStatusText = value; }
 }
@@ -55,6 +59,7 @@ public class ItemEditor : Editor
     public override void OnInspectorGUI()
     {
         var script = (Buildable)target;
+        var textAreaStyle = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
 
         // UI START
         GUILayout.Space(16);
@@ -72,36 +77,65 @@ public class ItemEditor : Editor
         DrawHorizontalRule();
         DrawHeader("Description");
 
-        script.description = EditorGUILayout.TextArea(script.description, GUILayout.Height(64));
+        script.description = EditorGUILayout.TextArea(script.description, textAreaStyle, GUILayout.Height(64));
 
         // EFFECTS SECTION
         DrawHorizontalRule();
         DrawHeader("All Buildables");
 
-        script.environmentEffect = (int)EditorGUILayout.Slider("Environment", script.environmentEffect, -5, 5);
-        script.happinessEffect = (int)EditorGUILayout.Slider("Happiness", script.happinessEffect, -5, 5);
-        script.economyEffect = (int)EditorGUILayout.Slider("Economy", script.economyEffect, -5, 5);
+        script.materialsEffect = (int)EditorGUILayout.Slider("Materials", script.materialsEffect, -3, 3);
+        script.foodEffect = (int)EditorGUILayout.Slider("Food", script.foodEffect, -3, 3);
+        script.goldEffect = (int)EditorGUILayout.Slider("Gold", script.goldEffect, -3, 3);
 
-        // BUILDABLE TYPE SECTION
+        script.pollutable = EditorGUILayout.Toggle("Pollutable", script.pollutable);
+
+        // BUILDABLE FOCUS SECTION
         DrawHorizontalRule();
         DrawHeader("Buildable Focus");
 
         script.buildableFocus = (Stat)EditorGUILayout.EnumPopup("Focused Stat", script.buildableFocus);
         script.requiredConnection = EditorGUILayout.ObjectField("Required Connection", script.requiredConnection, typeof(Connection), false) as Connection;
         if(script.requiredConnection != null) {
-            script.positiveRequiredConnectionStatusText = EditorGUILayout.TextField("Positive Status", script.positiveRequiredConnectionStatusText);
-            script.negativeRequiredConnectionStatusText = EditorGUILayout.TextField("Negative Status", script.negativeRequiredConnectionStatusText);
+            EditorGUILayout.Space(16);
+            EditorGUILayout.LabelField("Positive Status (Connection)");
+            script.positiveRequiredConnectionStatusText = EditorGUILayout.TextArea(script.positiveRequiredConnectionStatusText, textAreaStyle);
+            EditorGUILayout.LabelField("Negative Status (Connection)");
+            script.negativeRequiredConnectionStatusText = EditorGUILayout.TextArea(script.negativeRequiredConnectionStatusText, textAreaStyle);
+            EditorGUILayout.Space(16);
         }
 
-        if(script.buildableFocus == Stat.Materials) {
+        if(script.buildableFocus == Stat.Materials || script.buildableFocus == Stat.Food) {
             script.pollutionInfluence = (int)EditorGUILayout.Slider("Pollution Influence", script.pollutionInfluence, 0, 3);
-            script.pollutionInfluenceStatusText = EditorGUILayout.TextField("Status", script.pollutionInfluenceStatusText);
-        } else if(script.buildableFocus == Stat.Food) {
-            script.residents = (int)EditorGUILayout.Slider("Residents", script.residents, 0, 3);
+            if(script.pollutionInfluence == 0) {
+                EditorGUILayout.Space(16);
+                EditorGUILayout.LabelField("Status (Pollution)");
+                script.positivePollutionInfluenceStatusText = EditorGUILayout.TextArea(script.positivePollutionInfluenceStatusText, textAreaStyle);
+                EditorGUILayout.Space(16);
+            } else {
+                EditorGUILayout.Space(16);
+                EditorGUILayout.LabelField("Positive Status (Pollution)");
+                script.positivePollutionInfluenceStatusText = EditorGUILayout.TextArea(script.positivePollutionInfluenceStatusText, textAreaStyle);
+                EditorGUILayout.LabelField("Negative Status (Pollution)");
+                script.negativePollutionInfluenceStatusText = EditorGUILayout.TextArea(script.negativePollutionInfluenceStatusText, textAreaStyle);
+                EditorGUILayout.Space(16);
+            }
         } else if(script.buildableFocus == Stat.Gold) {
             script.requiredCustomers = (int)EditorGUILayout.Slider("Required Customers", script.requiredCustomers, 0, 3);
-            script.positiveRequiredCustomersStatusText = EditorGUILayout.TextField("Positive Status", script.positiveRequiredCustomersStatusText);
-            script.negativeRequiredCustomersStatusText = EditorGUILayout.TextField("Negative Status", script.negativeRequiredCustomersStatusText);
+            if(script.requiredCustomers == 0) {
+                EditorGUILayout.Space(16);
+                EditorGUILayout.LabelField("Status (Customer)");
+                script.positiveRequiredCustomersStatusText = EditorGUILayout.TextArea(script.positiveRequiredCustomersStatusText, textAreaStyle);
+                EditorGUILayout.Space(16);
+            } else {
+                EditorGUILayout.Space(16);
+                EditorGUILayout.LabelField("Positive Status (Customer)");
+                script.positiveRequiredCustomersStatusText = EditorGUILayout.TextArea(script.positiveRequiredCustomersStatusText, textAreaStyle);
+                EditorGUILayout.LabelField("Negative Status (Customer)");
+                script.negativeRequiredCustomersStatusText = EditorGUILayout.TextArea(script.negativeRequiredCustomersStatusText, textAreaStyle);
+                EditorGUILayout.Space(16);
+            }
+        } else if(script.buildableFocus == Stat.Population) {
+            script.residents = (int)EditorGUILayout.Slider("Residents", script.residents, 0, 3);
         }
 
         // REFERENCES SECTION

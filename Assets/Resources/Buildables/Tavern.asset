@@ -14,7 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: incomplete
-  _environmentEffect: -2
-  _happinessEffect: 2
-  _economyEffect: 0
+  _materialsEffect: 0
+  _foodEffect: 0
+  _goldEffect: 0
+  _pollutable: 0
+  _buildableFocus: 3
+  _requiredConnection: {fileID: 0}
+  _positiveRequiredConnectionStatusText: 
+  _negativeRequiredConnectionStatusText: 
+  _pollutionInfluence: 0
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
+  _residents: 0
+  _requiredCustomers: 1
+  _positiveRequiredCustomersStatusText: Customers are happily buying drinks.
+  _negativeRequiredCustomersStatusText: There are no customers buying drinks.
+  _upgrade: {fileID: 0}
   _tile: {fileID: 4589065837049068480, guid: 101a520a6a31b43b9827247e6ba3f74d, type: 3}
