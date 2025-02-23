@@ -28,7 +28,7 @@ public class CardPrefab : MonoBehaviour, Animatable
         card = _card;
 
         if(displayTypeIconOnBack) {
-            mainIcon.sprite = CardsHandler.instance.GetCardTypeIcon(card.cardType);
+            mainIcon.sprite = CardsHandler.instance.GetCardIcon(card);
         }
 
         description.text = card.description;
@@ -36,7 +36,7 @@ public class CardPrefab : MonoBehaviour, Animatable
         for(int i = 0; i < raritiesHolder.childCount; i++) {
             raritiesHolder.GetChild(i).GetComponent<TMP_Text>().text = card.cardRarity.ToString().ToUpper();
             raritiesHolder.GetChild(i).GetComponent<TMP_Text>().color = CardsHandler.instance.GetCardRarityColor(card.cardRarity);
-            typeIconsHolder.GetChild(i).GetComponent<Image>().sprite = CardsHandler.instance.GetCardTypeIcon(card.cardType);
+            typeIconsHolder.GetChild(i).GetComponent<Image>().sprite = CardsHandler.instance.GetCardIcon(card);
         }
 
 

@@ -43,6 +43,7 @@ public class CardsHandler : MonoBehaviour
     [SerializeField] private List<Transform> buttonTransforms;
     [SerializeField] private List<Sprite> typeIcons;
     [SerializeField] private List<Color> rarityColors;
+    [SerializeField] private Sprite riskIcon;
     private GameCard focusedGameCard;
 
     void Awake() {
@@ -189,22 +190,10 @@ public class CardsHandler : MonoBehaviour
 
             cardObject.transform.Find("RarityDisplay").GetComponent<Image>().DOFade(0f, animationSpeed);
             cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(0f, animationSpeed).OnComplete(() => {
-                cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().sprite = GetCardTypeIcon(CardType.None);
+                cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().sprite = GetCardIcon(null);
                 cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(1f, animationSpeed);
             });
-
-            // //if the card is a risk card, set the icon to a random card type icon from the deck
-            // if(gameCard.card.cardRarity == CardRarity.Risk) {
-            //     List<Card> nonRiskCards = deckCards.Where(x => x.card.cardRarity != CardRarity.Risk).ToList().ConvertAll(x => x.card);
-            //     Card randomCard = nonRiskCards[Random.Range(0, nonRiskCards.Count)];
-            //     CardType randomType = (randomCard.cardType == CardType.Boost || randomCard.cardType == CardType.Strike) ? CardType.Boost : randomCard.cardType;
-
-            //     cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(0f, animationSpeed).OnComplete(() => {
-            //         cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().sprite = GetCardTypeIcon(randomType);
-            //         cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(1f, animationSpeed);
-            //     });
-            // }
-
+            
         }
 
         yield return new WaitForSeconds(animationSpeed);
@@ -281,7 +270,7 @@ public class CardsHandler : MonoBehaviour
         });
 
         focusedGameCard.cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(0f, 0.2f).OnComplete(() => {
-            focusedGameCard.cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().sprite = GetCardTypeIcon(focusedGameCard.card.cardType);
+            focusedGameCard.cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().sprite = GetCardIcon(focusedGameCard.card);
             focusedGameCard.cardObject.transform.Find("Back").Find("MainIcon").GetComponent<Image>().DOFade(1f, 0.2f);
         });
 
@@ -533,9 +522,17 @@ public class CardsHandler : MonoBehaviour
         return deckCards.FirstOrDefault(x => x.cardObject == cardObject);
     }
 
-    public Sprite GetCardTypeIcon(CardType type) {
+    public Sprite GetCardIcon(Card card) {
         List<CardType> cardTypes = new List<CardType>((CardType[])System.Enum.GetValues(typeof(CardType)));
-        return typeIcons[cardTypes.IndexOf(type)];
+
+        if(card == null) {
+            return typeIcons[cardTypes.IndexOf(CardType.None)];        
+        } else if(card.cardRarity != CardRarity.Risk) {
+            return typeIcons[cardTypes.IndexOf(card.cardType)];
+        } else {
+            return riskIcon;
+        }
+
     }
 
     public Color GetCardRarityColor(CardRarity rarity) {

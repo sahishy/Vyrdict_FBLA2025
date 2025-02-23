@@ -65,11 +65,14 @@ public class TileDisplayHandler : MonoBehaviour, Animatable
             }
         }
         //customers -- error here
-        if(CommunitiesHandler.instance.GetCommunity(tile).population >= CommunitiesHandler.instance.GetCommunity(tile).requiredPopulation) {
-            statusTexts.Add(tile.currentBuildable.positiveRequiredCustomersStatusText);
-        } else {
-            statusTexts.Add(tile.currentBuildable.negativeRequiredCustomersStatusText);
+        if(CommunitiesHandler.instance.GetCommunity(tile) != null) {
+            if(CommunitiesHandler.instance.GetCommunity(tile).population >= CommunitiesHandler.instance.GetCommunity(tile).requiredPopulation) {
+                statusTexts.Add(tile.currentBuildable.positiveRequiredCustomersStatusText);
+            } else {
+                statusTexts.Add(tile.currentBuildable.negativeRequiredCustomersStatusText);
+            }            
         }
+
         //pollution
         if(StatsHandler.instance.GetPollutionOutput(tile.currentBuildable) <= 1) {
             statusTexts.Add(tile.currentBuildable.positivePollutionInfluenceStatusText);

@@ -184,7 +184,7 @@ public class GameHandler : MonoBehaviour, Animatable
         Debug.Log($"Game Over! Survived {currentDay} days and {currentWeek} weeks.");
     }
 
-    ////--------------------------------------GAME LOOP--------------------------------------
+    //--------------------------------------GAME LOOP--------------------------------------
     private void SpawnHousing() {
         List<GridTile> availableSpots = GridHandler.instance.GetUnoccupiedTiles();
         GridTile targetSpot = availableSpots[Random.Range(0, availableSpots.Count)];
