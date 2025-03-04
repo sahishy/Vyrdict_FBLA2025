@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 34
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a Lumbermill Blueprint to a Lumbermill for 15 materials.
+  _description: Upgrade a Lumbermill Blueprint to a Lumbermill for 15 supplies.
   _cardRarity: 3
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 231ccf370606a4fe1bf886bfa6c42c54, type: 2}
-  _upgradeMaterialCost: 15
+  _upgradeSuppliesCost: 15
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

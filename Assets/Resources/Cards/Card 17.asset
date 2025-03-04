@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 17
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Well for 3 materials.
+  _description: Build a Well for 3 supplies.
   _cardRarity: 3
   _cardType: 1
   _buildable: {fileID: 11400000, guid: abf15eea2347447839eb8e391b8a0814, type: 2}
-  _buildableMaterialCost: 3
+  _buildableSuppliesCost: 3
   _buildableGoldCost: 0
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

@@ -28,6 +28,7 @@ public class GameHandler : MonoBehaviour, Animatable
     [SerializeField] private Gradient timeColor;
 
     [Header("References")]
+    [SerializeField] private CanvasGroup sceneChangeScreen;
     [SerializeField] private CanvasGroup gameplayScreen;
     [SerializeField] private TMP_Text dayText;
     [SerializeField] private Image dayBar;
@@ -38,17 +39,26 @@ public class GameHandler : MonoBehaviour, Animatable
 
     private bool timeInformationActive = false;
     private int statsInformationIndex = -1;
+    private bool fateInformationActive = false;
     [SerializeField] private Transform timeInformationPanel;
     [SerializeField] private Image timeInformationSpeedImage;
     [SerializeField] private List<Sprite> timeInformationSpeedIcons;
     [SerializeField] private Transform statsInformationPanel;
-    [SerializeField] private List<Transform> statsInformationPanels = new List<Transform>();
+    [SerializeField] private Transform fateInformationPanel;
 
     void Awake() {
         instance = this;
 
         DOTween.SetTweensCapacity(500, 50);
         gameplayScreen.alpha = 0;
+
+        //UPDATE TIME LIGHTING
+        UpdateTimeLighting();
+
+        sceneChangeScreen.gameObject.SetActive(true);
+        sceneChangeScreen.DOFade(0f, 1f).OnComplete(() => {
+            sceneChangeScreen.gameObject.SetActive(false);
+        });
     }
 
     //Starting method called at the start of the game (CALLED BY GridHandler, MAKES SURE MAP IS CREATED)
@@ -61,11 +71,8 @@ public class GameHandler : MonoBehaviour, Animatable
         //CardsHandler.instance.canPlay = false;
 
         //UPDATE UI
-        UpdateUI();
+        UpdateTimeUI();
         StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>(), 1f));
-
-        //UPDATE TIME LIGHTING
-        UpdateTimeLighting();
 
         //STARTING PROCESS - create factors, two starter houses, cutscene, dialogue
 
@@ -138,7 +145,7 @@ public class GameHandler : MonoBehaviour, Animatable
         Fate();
 
         //UPDATE ACTIVE UI - make sure to update UI that is open after stats are updated
-        UpdateUI();
+        UpdateTimeUI();
         if(statsInformationIndex != -1) {
             StatsHandler.instance.ShowStatsInformation(statsInformationIndex);
         }
@@ -161,11 +168,15 @@ public class GameHandler : MonoBehaviour, Animatable
 
     //Fate functionality, decreases fate timer at the end of each day, ends game if the fate timer is at zero
     private void Fate() {
-        fateTimer--;
+        ChangeFate(-1);
 
         if(fateTimer <= 0) {
-            //EndGame();
+            EndGame();
         }
+    }
+    public void ChangeFate(int value) {
+        fateTimer += value;
+        UpdateFateUI();
     }
 
     //Toggle time freezing
@@ -238,13 +249,14 @@ public class GameHandler : MonoBehaviour, Animatable
     }
 
     //--------------------------------------UI--------------------------------------
-    private void UpdateUI() {
+    private void UpdateTimeUI() {
         dayText.text = $"Day {currentDay}";
         dayText.transform.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
         dayBar.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
         weekText.text = $"Week {currentWeek}";
         StartCoroutine(RefreshContentSizeFitter(dayText.transform.parent.GetComponent<ContentSizeFitter>()));
-
+    }
+    private void UpdateFateUI() {
         fateText.text = $"{fateTimer} Days";
         fateText.transform.parent.DOPunchScale(Vector3.one * 0.2f, 0.1f, 0, 0f);
         fateBar.DOFillAmount(fateTimer / 7f, 0.5f);
@@ -303,7 +315,18 @@ public class GameHandler : MonoBehaviour, Animatable
                 }
             }
         });
+    }
 
+    public void ShowFateInformation() {
+        fateInformationActive = true;
+        currentFocusedAnimatable = this;
+
+        fateInformationPanel.DOScaleY(1, 0.2f).SetEase(Ease.OutBack);
+    }
+    public void HideFateInformation() {
+        fateInformationActive = false;
+
+        fateInformationPanel.DOScaleY(0, 0.2f).SetEase(Ease.InBack);
     }
 
     public void AnimatableExit()
@@ -313,6 +336,9 @@ public class GameHandler : MonoBehaviour, Animatable
         }
         if(statsInformationIndex != -1) {
             HideStatsInformation();
+        }
+        if(fateInformationActive) {
+            HideFateInformation();
         }
     }
 }

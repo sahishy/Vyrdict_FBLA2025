@@ -11,7 +11,7 @@ public class StatsHandler : MonoBehaviour
     public static StatsHandler instance;
 
     [Header("Stats - Main")]
-    public int materials = 100;
+    public int supplies = 100;
     public int food = 100;
     public int gold = 100;
     [Header("Stats - Misc")]
@@ -22,7 +22,7 @@ public class StatsHandler : MonoBehaviour
     private List<StatChange> currentStatChanges = new List<StatChange>();
 
     [Header("References")]
-    [SerializeField] private TMP_Text materialsText;
+    [SerializeField] private TMP_Text suppliesText;
     [SerializeField] private TMP_Text foodText;
     [SerializeField] private TMP_Text goldText;
 
@@ -54,15 +54,15 @@ public class StatsHandler : MonoBehaviour
     }
 
     //Sets the main stats to random values at the start of the game
-    //---Materials starts off high, as the island is full of resources when it is just made
+    //---supplies starts off high, as the island is full of resources when it is just made
     //---Food starts off low, as the community only has 2 tents at the start
     //---Gold starts off low, as again, the community only has 2 tents at the start
     private void SetStartingStats() {
-        Vector2Int randomMaterialsRange = new Vector2Int(90, 98);
+        Vector2Int randomsuppliesRange = new Vector2Int(90, 98);
         Vector2Int randomFoodRange = new Vector2Int(35, 45);
         Vector2Int randomGoldRange = new Vector2Int(20, 30);
 
-        materials = Random.Range(randomMaterialsRange.x, randomMaterialsRange.y);
+        supplies = Random.Range(randomsuppliesRange.x, randomsuppliesRange.y);
         food = Random.Range(randomFoodRange.x, randomFoodRange.y);
         gold = Random.Range(randomGoldRange.x, randomGoldRange.y);
     }
@@ -77,13 +77,13 @@ public class StatsHandler : MonoBehaviour
 
             (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
 
-            materials += buildableStatEffects.Item1;
+            supplies += buildableStatEffects.Item1;
             food += buildableStatEffects.Item2;
             gold += buildableStatEffects.Item3;
         }
 
         foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
-            materials += connectionGroup.connection.environmentEffect;
+            supplies += connectionGroup.connection.environmentEffect;
             food += connectionGroup.connection.happinessEffect;
             gold += connectionGroup.connection.economyEffect;
         }
@@ -119,14 +119,14 @@ public class StatsHandler : MonoBehaviour
         UpdateUI();
 
         //show stat change animation for each stat
-        StatChangeAnimation(Stat.Materials, GetTotalStatChange(Stat.Materials));
+        StatChangeAnimation(Stat.Supplies, GetTotalStatChange(Stat.Supplies));
         StatChangeAnimation(Stat.Food, GetTotalStatChange(Stat.Food));
         StatChangeAnimation(Stat.Gold, GetTotalStatChange(Stat.Gold));
     }
 
     //Returns the stat effects of a buildable based on various factors
     public (int, int, int) GetBuildableStats(Buildable buildable, GridTile tile) {
-        int materialsEffect = 0;
+        int suppliesEffect = 0;
         int foodEffect = 0;
         int goldEffect = 0;
 
@@ -137,16 +137,16 @@ public class StatsHandler : MonoBehaviour
         int effectModifier = hasRequiredConnection ? (meetsRequiredConnection ? 1 : -1) : 1;
 
         //Change stat based on whether required connection is met or not
-        if(buildable.buildableFocus == Stat.Materials || buildable.buildableFocus == Stat.Food) {
-            materialsEffect += buildable.materialsEffect * effectModifier;
+        if(buildable.buildableFocus == Stat.Supplies || buildable.buildableFocus == Stat.Food) {
+            suppliesEffect += buildable.suppliesEffect * effectModifier;
             foodEffect = buildable.foodEffect * effectModifier;
             goldEffect = buildable.goldEffect;
         } else if(buildable.buildableFocus == Stat.Gold) {
-            materialsEffect = buildable.materialsEffect;
+            suppliesEffect = buildable.suppliesEffect;
             foodEffect = buildable.foodEffect;
             goldEffect += buildable.goldEffect * effectModifier;
         } else if(buildable.buildableFocus == Stat.Population) {
-            materialsEffect = buildable.materialsEffect;
+            suppliesEffect = buildable.suppliesEffect;
             foodEffect = buildable.foodEffect;
             goldEffect = buildable.goldEffect;
         }
@@ -156,16 +156,16 @@ public class StatsHandler : MonoBehaviour
 
             Community community = CommunitiesHandler.instance.GetCommunity(tile);
 
-            //If the buildable focuses on materials or food, change its output based on a formula
+            //If the buildable focuses on supplies or food, change its output based on a formula
             //  effect  *  ( (community's # of polluting buildables)  *  (buildable's pollution influence)  *  (multiplier) )
-            if(buildable.buildableFocus == Stat.Materials || buildable.buildableFocus == Stat.Food) {
+            if(buildable.buildableFocus == Stat.Supplies || buildable.buildableFocus == Stat.Food) {
                 
                 int output = GetPollutionOutput(buildable);
 
                 //only have effects from pollution if it's at a significant level
                 if(output > 1) {
-                    if(buildable.buildableFocus == Stat.Materials) {
-                        materialsEffect *= -output;
+                    if(buildable.buildableFocus == Stat.Supplies) {
+                        suppliesEffect *= -output;
                     } else if(buildable.buildableFocus == Stat.Food) {
                         foodEffect *= -output;
                     }
@@ -189,13 +189,13 @@ public class StatsHandler : MonoBehaviour
               
         }
 
-        return (materialsEffect, foodEffect, goldEffect);
+        return (suppliesEffect, foodEffect, goldEffect);
     }
 
     //Method for changing a stat directly
     public void ChangeStat(Stat stat, int amount) {
-        if(stat == Stat.Materials) {
-            materials += amount;
+        if(stat == Stat.Supplies) {
+            supplies += amount;
         } else if(stat == Stat.Food) {
             food += amount;
         } else if(stat == Stat.Gold) {
@@ -241,11 +241,11 @@ public class StatsHandler : MonoBehaviour
     //-------------------------------------------------UI-------------------------------------------------
 
     private void UpdateUI() {
-        materialsText.text = materials.ToString();
+        suppliesText.text = supplies.ToString();
         foodText.text = food.ToString();
         goldText.text = gold.ToString();
 
-        materialsText.color = materials > 0 ? Color.white : negativeColor;
+        suppliesText.color = supplies > 0 ? Color.white : negativeColor;
         foodText.color = food > 0 ? Color.white : negativeColor;
         goldText.color = gold > 0 ? Color.white : negativeColor;
     }
@@ -259,9 +259,9 @@ public class StatsHandler : MonoBehaviour
         Stat stat = Stat.None;
 
         if(index == 0) {
-            header = $"Materials: {materials}";
+            header = $"Supplies: {supplies}";
             focusIndicatorPos = -55;
-            stat = Stat.Materials;
+            stat = Stat.Supplies;
         } else if(index == 1) {
             header = $"Food: {food}";
             focusIndicatorPos = 0;
@@ -332,8 +332,8 @@ public class StatsHandler : MonoBehaviour
         }
 
         Vector3 targetPos = Vector3.zero;
-        if(stat == Stat.Materials) {
-            targetPos = materialsText.transform.position;
+        if(stat == Stat.Supplies) {
+            targetPos = suppliesText.transform.position;
         } else if(stat == Stat.Food) {
             targetPos = foodText.transform.position;
         } else if(stat == Stat.Gold) {
@@ -342,7 +342,7 @@ public class StatsHandler : MonoBehaviour
         Vector3 startPos = targetPos - new Vector3(0, 60, 0);
         Vector3 endPos = targetPos - new Vector3(0, 20, 0);
 
-        TMP_Text statChange = Instantiate(statChangePrefab, materialsText.transform.parent.parent.parent).GetComponent<TMP_Text>();
+        TMP_Text statChange = Instantiate(statChangePrefab, suppliesText.transform.parent.parent.parent).GetComponent<TMP_Text>();
         statChange.text = change > 0 ? $"+{change}" : $"{change}";
         statChange.color = change > 0 ? positiveColor : negativeColor;
         statChange.transform.position = startPos;
@@ -353,8 +353,8 @@ public class StatsHandler : MonoBehaviour
     //-------------------------------------------------UTILITY-------------------------------------------------
 
     public int GetStat(Stat stat) {
-        if(stat == Stat.Materials) {
-            return materials;
+        if(stat == Stat.Supplies) {
+            return supplies;
         } else if(stat == Stat.Food) {
             return food;
         } else if(stat == Stat.Gold) {
@@ -363,8 +363,8 @@ public class StatsHandler : MonoBehaviour
         return 0;
     }
     public Stat GetStatByName(string name) {
-        if(name == "Materials") {
-            return Stat.Materials;
+        if(name == "supplies") {
+            return Stat.Supplies;
         } else if(name == "Food") {
             return Stat.Food;
         } else if(name == "Gold") {
@@ -434,7 +434,7 @@ public class StatsHandler : MonoBehaviour
             (int, int, int) buildableStatEffects = GetBuildableStats(placedBuildable.buildable, placedBuildable.tile);
 
             int focusedStatValue = 0;
-            if(stat == Stat.Materials) {
+            if(stat == Stat.Supplies) {
                 focusedStatValue = buildableStatEffects.Item1;                
             } else if(stat == Stat.Food) {
                 focusedStatValue = buildableStatEffects.Item2;
@@ -461,7 +461,7 @@ public class StatsHandler : MonoBehaviour
         //key: connection name, value: effect on stat
         Dictionary<string, int> effects = new Dictionary<string, int>();
 
-        if(stat == Stat.Materials) {
+        if(stat == Stat.Supplies) {
             foreach(ConnectionGroup connectionGroup in ConnectionsHandler.instance.connectionGroups) {
                 Connection connection = connectionGroup.connection;
 
@@ -563,7 +563,7 @@ public class StatsHandler : MonoBehaviour
 
 public enum Stat {
     None,
-    Materials,
+    Supplies,
     Food,
     Gold,
     Population

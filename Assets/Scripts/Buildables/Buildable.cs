@@ -7,7 +7,7 @@ public class Buildable : ScriptableObject
     [SerializeField] private Sprite _icon;
     [SerializeField] private string _description;
     //static effects
-    [SerializeField] private int _materialsEffect;
+    [SerializeField] private int _suppliesEffect;
     [SerializeField] private int _foodEffect;
     [SerializeField] private int _goldEffect;
     //buildable type
@@ -33,7 +33,7 @@ public class Buildable : ScriptableObject
 
     public Sprite icon { get => _icon; set => _icon = value; }
     public string description { get => _description; set => _description = value; }
-    public int materialsEffect { get => _materialsEffect; set => _materialsEffect = value; }
+    public int suppliesEffect { get => _suppliesEffect; set => _suppliesEffect = value; }
     public int foodEffect { get => _foodEffect; set => _foodEffect = value; }
     public int goldEffect { get => _goldEffect; set => _goldEffect = value; }
     public Connection requiredConnection { get => _requiredConnection; set => _requiredConnection = value; }
@@ -83,7 +83,7 @@ public class ItemEditor : Editor
         DrawHorizontalRule();
         DrawHeader("All Buildables");
 
-        script.materialsEffect = (int)EditorGUILayout.Slider("Materials", script.materialsEffect, -3, 3);
+        script.suppliesEffect = (int)EditorGUILayout.Slider("Materials", script.suppliesEffect, -3, 3);
         script.foodEffect = (int)EditorGUILayout.Slider("Food", script.foodEffect, -3, 3);
         script.goldEffect = (int)EditorGUILayout.Slider("Gold", script.goldEffect, -3, 3);
 
@@ -104,7 +104,7 @@ public class ItemEditor : Editor
             EditorGUILayout.Space(16);
         }
 
-        if(script.buildableFocus == Stat.Materials || script.buildableFocus == Stat.Food) {
+        if(script.buildableFocus == Stat.Supplies || script.buildableFocus == Stat.Food) {
             script.pollutionInfluence = (int)EditorGUILayout.Slider("Pollution Influence", script.pollutionInfluence, 0, 3);
             if(script.pollutionInfluence == 0) {
                 EditorGUILayout.Space(16);

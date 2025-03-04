@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Forest
   m_EditorClassIdentifier: 
   _icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _description: Nature.
-  _materialsEffect: 0
+  _description: A collective group of trees.
+  _suppliesEffect: 0
   _foodEffect: 0
   _goldEffect: 0
+  _pollutable: 0
   _buildableFocus: 1
   _requiredConnection: {fileID: 0}
   _positiveRequiredConnectionStatusText: 

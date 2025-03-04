@@ -8,58 +8,54 @@ using Unity.Collections;
 
 public class DecisionChoice : MonoBehaviour
 {
-    public ChoiceData choiceData;
+    public NormalChoiceData choiceData;
 
     [Header("References")]
-    [SerializeField] private Image buildableIcon;
-    [SerializeField] private TMP_Text buildableName;
-    //[SerializeField] private TMP_Text buildableAmount;
     [SerializeField] private TMP_Text choiceDescription;
-    [SerializeField] private Transform environmentHolder;
-    [SerializeField] private Transform happinessHolder;
-    [SerializeField] private Transform economyHolder;
+    [SerializeField] private Transform suppliesHolder;
+    [SerializeField] private Transform foodHolder;
+    [SerializeField] private Transform goldHolder;
+    [SerializeField] private Transform fateHolder;
 
     private Color32 positiveColor = new Color32(195, 250, 216, 255);
     private Color32 negativeColor = new Color32(245, 201, 196, 255);
     private Color32 disabledColor = new Color32(0, 0, 0, 50);
 
-    public void Initialize(ChoiceData _choiceData, int index)
+    public void Initialize(NormalChoiceData _choiceData, int index)
     {
         choiceData = _choiceData;
 
-        Buildable buildable = PlacementHandler.instance.GetBuildable(choiceData.buildable);
-        buildableIcon.sprite = buildable.icon;
-        buildableName.text = buildable.name;
-        choiceDescription.text = choiceData.description;
+        choiceDescription.text = _choiceData.description;
         
         //update stat effects
-        if(choiceData.stat1 == "Environment" || choiceData.stat2 == "Environment") {
-            if(choiceData.stat1 == "Environment") {
-                environmentHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
-                environmentHolder.gameObject.SetActive(true);
+        if(choiceData.stat1 == "supplies" || choiceData.stat2 == "supplies") {
+            if(choiceData.stat1 == "supplies") {
+                suppliesHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1.ToString();
+                suppliesHolder.gameObject.SetActive(true);
             } else {
-                environmentHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
-                environmentHolder.gameObject.SetActive(true);
+                suppliesHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2.ToString();
+                suppliesHolder.gameObject.SetActive(true);
             }
         }
-        if(choiceData.stat1 == "Happiness" || choiceData.stat2 == "Happiness") {
-            if(choiceData.stat1 == "Happiness") {
-                happinessHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
-                happinessHolder.gameObject.SetActive(true);
+        if(choiceData.stat1 == "food" || choiceData.stat2 == "food") {
+            if(choiceData.stat1 == "food") {
+                foodHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1.ToString();
+                foodHolder.gameObject.SetActive(true);
             } else {
-                happinessHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
-                happinessHolder.gameObject.SetActive(true);
+                foodHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2.ToString();
+                foodHolder.gameObject.SetActive(true);
             }
         }
-        if(choiceData.stat1 == "Economy" || choiceData.stat2 == "Economy") {
-            if(choiceData.stat1 == "Economy") {
-                economyHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1;
-                economyHolder.gameObject.SetActive(true);
+        if(choiceData.stat1 == "gold" || choiceData.stat2 == "gold") {
+            if(choiceData.stat1 == "gold") {
+                goldHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect1.ToString();
+                goldHolder.gameObject.SetActive(true);
             } else {
-                economyHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2;
-                economyHolder.gameObject.SetActive(true);
+                goldHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.effect2.ToString();
+                goldHolder.gameObject.SetActive(true);
             }
         }
+        fateHolder.Find("value").GetComponent<TMP_Text>().text = choiceData.fateEffect.ToString();
 
         //START ANIMATION
         StartCoroutine(FadeSequence(index));
@@ -69,20 +65,20 @@ public class DecisionChoice : MonoBehaviour
 
         gameObject.GetComponent<CanvasGroup>().DOFade(1, 0.5f);
 
-        if(choiceData.stat1 == "Environment" || choiceData.stat2 == "Environment") {
-            environmentHolder.GetComponent<ContentSizeFitter>().enabled = true;         
+        if(choiceData.stat1 == "Supplies" || choiceData.stat2 == "Supplies") {
+            suppliesHolder.GetComponent<ContentSizeFitter>().enabled = true;         
         }
-        if(choiceData.stat1 == "Happiness" || choiceData.stat2 == "Happiness") {
-            happinessHolder.GetComponent<ContentSizeFitter>().enabled = true;        
+        if(choiceData.stat1 == "Food" || choiceData.stat2 == "Food") {
+            foodHolder.GetComponent<ContentSizeFitter>().enabled = true;        
         }
-        if(choiceData.stat1 == "Economy" || choiceData.stat2 == "Economy") {
-            economyHolder.GetComponent<ContentSizeFitter>().enabled = true;
+        if(choiceData.stat1 == "Gold" || choiceData.stat2 == "Gold") {
+            goldHolder.GetComponent<ContentSizeFitter>().enabled = true;
         }
 
         //reset main content size fitter
-        environmentHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        suppliesHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         yield return null;
-        environmentHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.MinSize;
+        suppliesHolder.parent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.MinSize;
     }
 
     public void ButtonClick() {

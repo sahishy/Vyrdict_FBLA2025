@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 12
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Tavern Blueprint for 15 materials and 10 gold.
+  _description: Build a Tavern Blueprint for 15 supplies and 10 gold.
   _cardRarity: 2
   _cardType: 1
   _buildable: {fileID: 11400000, guid: 9155fd6d1ac214be8aa6b72bcfff44b5, type: 2}
-  _buildableMaterialCost: 15
+  _buildableSuppliesCost: 15
   _buildableGoldCost: 10
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

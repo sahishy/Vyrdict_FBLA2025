@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 29
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a House to a Manor for 20 materials and 15 gold.
+  _description: Upgrade a House to a Manor for 20 supplies and 15 gold.
   _cardRarity: 3
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 98e1b451738204522b9a2c2cca69aa9d, type: 2}
-  _upgradeMaterialCost: 20
+  _upgradeSuppliesCost: 20
   _upgradeGoldCost: 15
   _statFrom: 0
   _statFromValue: 0

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Blacksmith
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: d0f7acbdfd8d242278516695223a33c5, type: 3}
-  _description: A place where materials are refined into valuable commodities. Poll
-  _materialsEffect: 3
+  _description: A place where materials are refined into valuable commodities.
+  _suppliesEffect: 3
   _foodEffect: 0
   _goldEffect: 0
   _pollutable: 1

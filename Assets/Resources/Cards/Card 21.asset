@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Card 21
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a Blacksmith Blueprint to a Blacksmith for 20 materials and
+  _description: Upgrade a Blacksmith Blueprint to a Blacksmith for 20 supplies and
     10 gold.
   _cardRarity: 2
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 20c0150f1b0fc49368dafd08a6152738, type: 2}
-  _upgradeMaterialCost: 20
+  _upgradeSuppliesCost: 20
   _upgradeGoldCost: 10
   _statFrom: 0
   _statFromValue: 0

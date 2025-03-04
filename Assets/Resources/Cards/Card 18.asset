@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 18
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Windmill Blueprint for 15 materials and 10 gold.
+  _description: Build a Windmill Blueprint for 15 supplies and 10 gold.
   _cardRarity: 2
   _cardType: 1
   _buildable: {fileID: 11400000, guid: 6cfb11c85aed945de898fb66b6bdf467, type: 2}
-  _buildableMaterialCost: 15
+  _buildableSuppliesCost: 15
   _buildableGoldCost: 10
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

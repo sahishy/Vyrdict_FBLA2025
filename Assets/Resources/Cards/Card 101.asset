@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 101
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Lose 15 materials.
+  _description: Lose 15 supplies.
   _cardRarity: 1
   _cardType: 7
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

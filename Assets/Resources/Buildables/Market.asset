@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: A marketplace where only the best resources are traded, requiring
-    at least 3 customers to be profitable.
-  _materialsEffect: 0
+    at least three customers to be profitable.
+  _suppliesEffect: 0
   _foodEffect: 0
   _goldEffect: 0
   _pollutable: 0

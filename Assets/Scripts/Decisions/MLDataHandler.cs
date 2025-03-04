@@ -10,19 +10,23 @@ using Newtonsoft.Json;
 public class MLDataHandler : MonoBehaviour
 {
     public static MLDataHandler instance;
-    public ResponseData currentData = null;
+    public NormalResponseData currentNormalData = null;
+    public CrisisResponseData currentCrisisData = null;
 
     void Awake() {
         instance = this;
     }
 
-    private string uri = "http://127.0.0.1:1234/generate";
+    private string normalURI = "http://127.0.0.1:1234/generate/normal";
+    private string crisisURI = "http://127.0.0.1:1234/generate/crisis";
 
-    public IEnumerator FetchMLResponse() {
+    public IEnumerator FetchMLResponse(bool isCrisis) {
+
+        string uri = isCrisis ? crisisURI : normalURI;
 
         MLData data = GetMLData();
 
-        byte[] encodedJson = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+        byte[] encodedJson = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 
         using UnityWebRequest webRequest = new UnityWebRequest(uri, "POST");
         webRequest.uploadHandler = new UploadHandlerRaw(encodedJson);
@@ -35,32 +39,19 @@ public class MLDataHandler : MonoBehaviour
             Debug.LogError("Error connecting to server: " + webRequest.error);
         } else {
             //success
-            ResponseData response = JsonConvert.DeserializeObject<ResponseData>(webRequest.downloadHandler.text);
 
-            currentData = response;
+            if(isCrisis) {
+                CrisisResponseData response = JsonConvert.DeserializeObject<CrisisResponseData>(webRequest.downloadHandler.text);
+                currentCrisisData = response;
 
-            // Debug.Log("Scenario: " + response.scenario);
-            // Debug.Log($"Choice 1");
-            // Debug.Log($"--------{response.choices.choice1.description}");
-            // Debug.Log($"--------{response.choices.choice1.stat1}");
-            // Debug.Log($"--------{response.choices.choice1.effect1}");
-            // Debug.Log($"--------{response.choices.choice1.stat2}");
-            // Debug.Log($"--------{response.choices.choice1.effect2}");
-            // Debug.Log($"--------{response.choices.choice1.buildable}");
-            // Debug.Log($"Choice 2: {response.choices.choice2.description}");
-            // Debug.Log($"--------{response.choices.choice2.description}");
-            // Debug.Log($"--------{response.choices.choice2.stat1}");
-            // Debug.Log($"--------{response.choices.choice2.effect1}");
-            // Debug.Log($"--------{response.choices.choice2.stat2}");
-            // Debug.Log($"--------{response.choices.choice2.effect2}");
-            // Debug.Log($"--------{response.choices.choice2.buildable}");
-            // Debug.Log($"Choice 3: {response.choices.choice3.description}");
-            // Debug.Log($"--------{response.choices.choice3.description}");
-            // Debug.Log($"--------{response.choices.choice3.stat1}");
-            // Debug.Log($"--------{response.choices.choice3.effect1}");
-            // Debug.Log($"--------{response.choices.choice3.stat2}");
-            // Debug.Log($"--------{response.choices.choice3.effect2}");
-            // Debug.Log($"--------{response.choices.choice3.buildable}");
+                Debug.Log(JsonConvert.SerializeObject(response, Formatting.Indented));
+            } else {
+                NormalResponseData response = JsonConvert.DeserializeObject<NormalResponseData>(webRequest.downloadHandler.text);
+                currentNormalData = response;
+
+                Debug.Log(JsonConvert.SerializeObject(response, Formatting.Indented));
+            }
+
         }
     }
 
@@ -69,12 +60,13 @@ public class MLDataHandler : MonoBehaviour
         string[] tempPlacedBuildables = PlacementHandler.instance.GetPlacedBuildables().ConvertAll(x => x.buildable.name).Where(x => x != "Forest").OrderBy(x => x).ToArray();
 
         MLData data = new MLData {
-            environment = StatsHandler.instance.GetStat(Stat.Materials),
-            environmentChange = StatsHandler.instance.GetTotalStatChange(Stat.Materials),
-            happiness = StatsHandler.instance.GetStat(Stat.Food),
-            happinessChange = StatsHandler.instance.GetTotalStatChange(Stat.Food),
-            economy = StatsHandler.instance.GetStat(Stat.Gold),
-            economyChange = StatsHandler.instance.GetTotalStatChange(Stat.Gold),
+            supplies = StatsHandler.instance.GetStat(Stat.Supplies),
+            suppliesChange = StatsHandler.instance.GetTotalStatChange(Stat.Supplies),
+            food = StatsHandler.instance.GetStat(Stat.Food),
+            foodChange = StatsHandler.instance.GetTotalStatChange(Stat.Food),
+            gold = StatsHandler.instance.GetStat(Stat.Gold),
+            goldChange = StatsHandler.instance.GetTotalStatChange(Stat.Gold),
+            fate = GameHandler.instance.fateTimer,
             placedBuildables = tempPlacedBuildables
         };
 
@@ -83,29 +75,34 @@ public class MLDataHandler : MonoBehaviour
 }
 
 public class MLData {
-    public int environment;
-    public int environmentChange;
-    public int happiness;
-    public int happinessChange;
-    public int economy;
-    public int economyChange;
+    public int supplies;
+    public int suppliesChange;
+    public int food;
+    public int foodChange;
+    public int gold;
+    public int goldChange;
+    public int fate;
     public string[] placedBuildables;
 }
 
-public class ResponseData {
+public class NormalResponseData {
     public string scenario;
-    public ChoicesData choices;
+    public Dictionary<string, NormalChoiceData> choices;
 }
-public class ChoicesData {
-    public ChoiceData choice1;
-    public ChoiceData choice2;
-    public ChoiceData choice3;
-}
-public class ChoiceData {
+public class NormalChoiceData {
     public string description;
     public string stat1;
-    public string effect1;
+    public int effect1;
     public string stat2;
-    public string effect2;
-    public string buildable;
+    public int effect2;
+    public int fateEffect;
+}
+public class CrisisResponseData {
+    public string crisis;
+    public Dictionary<string, CrisisChoiceData> choices;
+}
+public class CrisisChoiceData {
+    public string description;
+    public string stat;
+    public int effect;
 }

@@ -14,15 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _description: A blueprint for a future Church.
-  _materialsEffect: -2
+  _suppliesEffect: -2
   _foodEffect: 0
   _goldEffect: -2
+  _pollutable: 0
   _buildableFocus: 0
   _requiredConnection: {fileID: 0}
   _positiveRequiredConnectionStatusText: 
   _negativeRequiredConnectionStatusText: 
   _pollutionInfluence: 0
-  _pollutionInfluenceStatusText: 
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
   _residents: 0
   _requiredCustomers: 0
   _positiveRequiredCustomersStatusText: 

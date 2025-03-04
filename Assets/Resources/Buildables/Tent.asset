@@ -13,16 +13,18 @@ MonoBehaviour:
   m_Name: Tent
   m_EditorClassIdentifier: 
   _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  _description: A basic shelter where 1 person lives.
-  _materialsEffect: 0
+  _description: A basic shelter where one person lives.
+  _suppliesEffect: 0
   _foodEffect: -1
   _goldEffect: 0
+  _pollutable: 0
   _buildableFocus: 4
   _requiredConnection: {fileID: 11400000, guid: 7a85583304ebb4fee87c36035ba1d566, type: 2}
   _positiveRequiredConnectionStatusText: The residents are happy.
   _negativeRequiredConnectionStatusText: The residents are lonely, they want neighbors.
   _pollutionInfluence: 0
-  _pollutionInfluenceStatusText: 
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
   _residents: 1
   _requiredCustomers: 0
   _positiveRequiredCustomersStatusText: 

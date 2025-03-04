@@ -26,7 +26,7 @@ public class GridHandler : MonoBehaviour
 
     void Start()
     {
-        Invoke(nameof(CreateGrid), 1);
+        Invoke(nameof(CreateGrid), 2);
     }
 
     void CreateGrid() {

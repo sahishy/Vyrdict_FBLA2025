@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 4
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Booth for 5 materials and 5 gold.
+  _description: Build a Booth for 5 supplies and 5 gold.
   _cardRarity: 3
   _cardType: 1
   _buildable: {fileID: 11400000, guid: 6ed589ef897f044ca87de3a38f828983, type: 2}
-  _buildableMaterialCost: 5
+  _buildableSuppliesCost: 5
   _buildableGoldCost: 5
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

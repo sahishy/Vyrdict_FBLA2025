@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 89
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Gain 50 materials.
+  _description: Gain 50 gold.
   _cardRarity: 6
   _cardType: 4
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

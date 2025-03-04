@@ -13,8 +13,6 @@ public class DecisionHandler : MonoBehaviour
     public bool inDecisionMode = false;
     private bool cooldown = false;
 
-    private List<Decision> allDecisions = new List<Decision>();
-
     [Header("References")]
     [SerializeField] private GameObject gameplayScreen;
     [SerializeField] private GameObject decisionScreen;
@@ -28,7 +26,7 @@ public class DecisionHandler : MonoBehaviour
 
     [SerializeField] private RectTransform weekStatsHolder;
     [SerializeField] private RectTransform weekStatsTextHolder;
-    [SerializeField] private TMP_Text materialsText;
+    [SerializeField] private TMP_Text suppliesText;
     [SerializeField] private TMP_Text foodText;
     [SerializeField] private TMP_Text goldText;
 
@@ -38,8 +36,6 @@ public class DecisionHandler : MonoBehaviour
 
     void Awake() {
         instance = this;
-
-        allDecisions = Resources.LoadAll<Decision>("Decisions").ToList();
     }
 
     //--------------------------------------DECISIONS--------------------------------------
@@ -69,17 +65,18 @@ public class DecisionHandler : MonoBehaviour
         StartCoroutine(DecisionMakingAnimation());
     }
     //Creates choices from ML generated scenario
-    private void ChoiceCreation(ResponseData response) {
+    private void ChoiceCreation(NormalResponseData response) {
         
+        Debug.Log(JsonUtility.ToJson(response, true));
 
         for(int i = 0; i < 3; i++) {
-            ChoiceData choiceData;
+            NormalChoiceData choiceData;
             if (i == 0) {
-                choiceData = response.choices.choice1;
+                choiceData = response.choices["1"];
             } else if(i == 1) {
-                choiceData = response.choices.choice2;
+                choiceData = response.choices["2"];
             } else {
-                choiceData = response.choices.choice3;
+                choiceData = response.choices["3"];
             }
 
             DecisionChoice choice = Instantiate(decisionChoicePrefab, decisionChoiceHolder.transform).GetComponent<DecisionChoice>();
@@ -92,7 +89,7 @@ public class DecisionHandler : MonoBehaviour
         cooldown = false;
     }
     //Called when player selects a choice in the decision screen
-    public void SelectChoice(ChoiceData choiceData) {
+    public void SelectChoice(NormalChoiceData choiceData) {
         if(cooldown) {
             return;
         }
@@ -110,8 +107,9 @@ public class DecisionHandler : MonoBehaviour
         Invoke(nameof(ResetDecisionMakingAnimation), 1f);
 
         //CHANGE STATS AND ADD ITEM
-        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat1), int.Parse(choiceData.effect1));
-        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat2), int.Parse(choiceData.effect2));
+        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat1), choiceData.effect1);
+        StatsHandler.instance.ChangeStat(StatsHandler.instance.GetStatByName(choiceData.stat2), choiceData.effect2);
+        GameHandler.instance.ChangeFate(choiceData.fateEffect);
 
         inDecisionMode = false;
         cooldown = false;
@@ -127,8 +125,8 @@ public class DecisionHandler : MonoBehaviour
         
         //---------------------------------FETCH GENERATED ML DATA----------------------------------------------
 
-        ResponseData response = null;
-        StartCoroutine(MLDataHandler.instance.FetchMLResponse());
+        NormalResponseData response = null;
+        StartCoroutine(MLDataHandler.instance.FetchMLResponse(false));
         
         //------------------------------------------------------------------------------------------------------
 
@@ -165,8 +163,8 @@ public class DecisionHandler : MonoBehaviour
         float _happinessValue = 0f;
         float _economyValue = 0f;
 
-        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Materials), randomEnvironmentAnimationTime)
-        .SetEase(Ease.OutExpo).OnUpdate(() => materialsText.text = Mathf.RoundToInt(_environmentValue).ToString());
+        DOTween.To(x => _environmentValue = x, 0f, StatsHandler.instance.GetStat(Stat.Supplies), randomEnvironmentAnimationTime)
+        .SetEase(Ease.OutExpo).OnUpdate(() => suppliesText.text = Mathf.RoundToInt(_environmentValue).ToString());
         DOTween.To(x => _happinessValue = x, 0f, StatsHandler.instance.GetStat(Stat.Food), randomHappinessAnimationTime)
         .SetEase(Ease.OutExpo).OnUpdate(() => foodText.text = Mathf.RoundToInt(_happinessValue).ToString());
         DOTween.To(x => _economyValue = x, 0f, StatsHandler.instance.GetStat(Stat.Gold), randomEconomyAnimationTime)
@@ -175,7 +173,7 @@ public class DecisionHandler : MonoBehaviour
         yield return new WaitForSeconds(3f);
 
         //show status color of raw stats (red bad, white neutral, green good)
-        materialsText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Materials)), 1f);
+        suppliesText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Supplies)), 1f);
         foodText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Food)), 1f);
         goldText.DOColor(StatsHandler.instance.GetStatusColor(StatsHandler.instance.GetStat(Stat.Gold)), 1f);
 
@@ -184,11 +182,11 @@ public class DecisionHandler : MonoBehaviour
 
         //---------------------------------WAIT UNTIL GENERATED ML DATA LOADS------------------------------------
 
-        yield return new WaitUntil(() => MLDataHandler.instance.currentData != null);
+        yield return new WaitUntil(() => MLDataHandler.instance.currentNormalData != null);
 
-        response = MLDataHandler.instance.currentData;
+        response = MLDataHandler.instance.currentNormalData;
 
-        MLDataHandler.instance.currentData = null;
+        MLDataHandler.instance.currentNormalData = null;
         
         //-------------------------------------------------------------------------------------------------------
 
@@ -234,8 +232,8 @@ public class DecisionHandler : MonoBehaviour
         weekStatsTextHolder.anchoredPosition = new Vector2(0, -75);
         weekStatsTextHolder.GetComponent<CanvasGroup>().alpha = 0;
         weekStatsTextHolder.transform.localScale = Vector3.one;
-        materialsText.text = "";
-        materialsText.color = Color.white;
+        suppliesText.text = "";
+        suppliesText.color = Color.white;
         foodText.text = "";
         foodText.color = Color.white;
         goldText.text = "";

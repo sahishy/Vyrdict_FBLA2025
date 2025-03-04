@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 35
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a Booth to a Market Blueprint for 15 materials and 10 gold.
+  _description: Upgrade a Booth to a Market Blueprint for 15 supplies and 10 gold.
   _cardRarity: 2
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 019322fd6338a488c992d8593bebb9ac, type: 2}
-  _upgradeMaterialCost: 15
+  _upgradeSuppliesCost: 15
   _upgradeGoldCost: 10
   _statFrom: 0
   _statFromValue: 0

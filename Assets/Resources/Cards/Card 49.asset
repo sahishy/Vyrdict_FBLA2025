@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 49
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Trade 5 gold for 30 materials.
+  _description: Trade 5 gold for 30 supplies.
   _cardRarity: 6
   _cardType: 3
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 3
   _statFromValue: 5

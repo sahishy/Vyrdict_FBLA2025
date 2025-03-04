@@ -13,16 +13,18 @@ MonoBehaviour:
   m_Name: House
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 75fb4a51f95f547e59ba2d25777cdbc7, type: 3}
-  _description: A small home where 2 people live.
-  _materialsEffect: 0
+  _description: A small home where two people live.
+  _suppliesEffect: 0
   _foodEffect: -2
   _goldEffect: 0
+  _pollutable: 0
   _buildableFocus: 4
   _requiredConnection: {fileID: 11400000, guid: 7a85583304ebb4fee87c36035ba1d566, type: 2}
   _positiveRequiredConnectionStatusText: The residents are happy.
   _negativeRequiredConnectionStatusText: The residents are lonely, they want neighbors.
   _pollutionInfluence: 0
-  _pollutionInfluenceStatusText: 
+  _positivePollutionInfluenceStatusText: 
+  _negativePollutionInfluenceStatusText: 
   _residents: 2
   _requiredCustomers: 0
   _positiveRequiredCustomersStatusText: 

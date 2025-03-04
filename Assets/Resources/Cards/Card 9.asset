@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 9
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Farm for 15 materials and 5 gold.
+  _description: Build a Farm for 15 supplies and 5 gold.
   _cardRarity: 3
   _cardType: 1
   _buildable: {fileID: 11400000, guid: 9a13d1d55453146538b2005f42ad51aa, type: 2}
-  _buildableMaterialCost: 15
+  _buildableSuppliesCost: 15
   _buildableGoldCost: 5
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

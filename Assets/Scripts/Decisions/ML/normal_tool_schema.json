@@ -1,0 +1,59 @@
+{
+    "type": "function",
+    "function": {
+        "name": "generate_dilemma",
+        "description": "Create an ethical dilemma for a player managing an island-based community in a strategy game.",
+        "parameters": {
+            "type": "object",
+            "required": ["scenario", "choices"],
+            "properties": {
+                "scenario": {
+                    "type": "string",
+                    "description": "A short ethical dilemma description."
+                },
+                "choices": {
+                    "type": "object",
+                    "required": ["choice1", "choice2", "choice3"],
+                    "properties": {
+                        "choice1": {
+                            "type": "object",
+                            "required": ["description", "stat1", "effect1", "stat2", "effect2", "fateEffect"],
+                            "properties": {
+                                "description": {"type": "string"},
+                                "stat1": {"type": "string"},
+                                "effect1": {"type": "integer"},
+                                "stat2": {"type": "string"},
+                                "effect2": {"type": "integer"},
+                                "fateEffect": {"type": "integer"}
+                            }
+                        },
+                        "choice2": {
+                            "type": "object",
+                            "required": ["description", "stat1", "effect1", "stat2", "effect2", "fateEffect"],
+                            "properties": {
+                                "description": {"type": "string"},
+                                "stat1": {"type": "string"},
+                                "effect1": {"type": "integer"},
+                                "stat2": {"type": "string"},
+                                "effect2": {"type": "integer"},
+                                "fateEffect": {"type": "integer"}
+                            }
+                        },
+                        "choice3": {
+                            "type": "object",
+                            "required": ["description", "stat1", "effect1", "stat2", "effect2", "fateEffect"],
+                            "properties": {
+                                "description": {"type": "string"},
+                                "stat1": {"type": "string"},
+                                "effect1": {"type": "integer"},
+                                "stat2": {"type": "string"},
+                                "effect2": {"type": "integer"},
+                                "fateEffect": {"type": "integer"}
+                            }
+                        }
+                    }
+                }
+            }
+        }            
+    }
+}

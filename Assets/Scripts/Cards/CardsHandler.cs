@@ -64,6 +64,11 @@ public class CardsHandler : MonoBehaviour
         }
         canUseCard = false;
 
+        //freeze time to prevent week end phase
+        GameHandler.instance.ToggleTimeFreeze(true);
+
+        //store as the focused card
+
         focusedGameCard = GetGameCardFromCardObject(cardObject);
 
         UseCardAnimation();
@@ -114,7 +119,14 @@ public class CardsHandler : MonoBehaviour
             
         }
 
+        //unfeeze time if the card wasn't a placement or crisis card
+        if(card.cardType != CardType.Buildable && card.cardType != CardType.Upgrade && card.cardType != CardType.Crisis) {
+            GameHandler.instance.ToggleTimeFreeze(false);
+        }
+
+        //end cooldown after two seconds
         Invoke(nameof(UseCardCooldown), 2f);
+
     }
     private void UseCardCooldown() {
         canUseCard = true;
@@ -151,6 +163,12 @@ public class CardsHandler : MonoBehaviour
 
         canUseCard = false;
 
+        //--RESET PREVIOUS DRAW PHASE CHANGES--
+        keepButtonText.text = "Keep (0/5)";
+        redrawButtonText.text = "Redraw (0/2)";
+        redraws = 0;
+        //-------------------------------------
+
         drawCardScreen.gameObject.SetActive(true);
         drawCardScreen.DOFade(1f, 1f);
 
@@ -159,6 +177,12 @@ public class CardsHandler : MonoBehaviour
         redrawButtonText.transform.parent.GetComponent<CanvasGroup>().DOFade(1f, 0.5f);
 
         yield return new WaitForSeconds(1f);
+
+        //destroy existing cards if any
+        if(deckCards.Count > 0) {
+            ClearDeck();
+            yield return new WaitForSeconds(1f);
+        }
 
         CreatePile();
 
@@ -278,7 +302,7 @@ public class CardsHandler : MonoBehaviour
 
     public void KeepCard() {
 
-        if(drawingCard) {
+        if(drawingCard || deckCards.Count >= 5) {
             return;
         }
 
@@ -379,7 +403,7 @@ public class CardsHandler : MonoBehaviour
                 if(giveHelpfulBuildable) {
 
                     Dictionary<Stat, int> statChanges = new Dictionary<Stat, int> {
-                        { Stat.Materials, StatsHandler.instance.GetTotalStatChange(Stat.Materials) },
+                        { Stat.Supplies, StatsHandler.instance.GetTotalStatChange(Stat.Supplies) },
                         { Stat.Food, StatsHandler.instance.GetTotalStatChange(Stat.Food) },
                         { Stat.Gold, StatsHandler.instance.GetTotalStatChange(Stat.Gold) }
                     };
@@ -412,11 +436,12 @@ public class CardsHandler : MonoBehaviour
 
                     focusedUpgradeCards = focusedUpgradeCards.Where(x => placedBuildables.Contains(PlacementHandler.instance.GetPreviousUpgrade(x.upgrade))).ToList();
                     
-                    //set the focused card to a random card in the possible upgrade cards
+                    //set the focused card to a random buildable card if there are no possible upgrades
                     if(focusedUpgradeCards.Count == 0) {
-                        List<Card> cards = allCards.Where(x => placedBuildables.Contains(PlacementHandler.instance.GetPreviousUpgrade(x.upgrade))).ToList();
+                        List<Card> cards = allCards.Where(x => x.cardType == CardType.Buildable).ToList();
                         focusedCard = cards[Random.Range(0, cards.Count)];
                     } else {
+                        //choose a random upgrade from the list of contextually filtered upgrade cards
                         focusedCard = focusedUpgradeCards[Random.Range(0, focusedUpgradeCards.Count)];
                     }
 

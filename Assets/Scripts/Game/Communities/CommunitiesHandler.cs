@@ -27,12 +27,12 @@ public class CommunitiesHandler : MonoBehaviour
             return;
         }
 
-        if(tile.currentBuildable.buildableFocus == Stat.Materials) {
+        if(tile.currentBuildable.name == "Forest") {
             return;
         }
 
         //find all communities that have tiles neighboring the current tile
-        List<Community> intersectingCommunities = allCommunities.Where(c => c.tiles.Any(t => tile.neighbors.Contains(t) && t.currentBuildable != null && t.currentBuildable.buildableFocus != Stat.Materials)).ToList();
+        List<Community> intersectingCommunities = allCommunities.Where(c => c.tiles.Any(t => tile.neighbors.Contains(t) && t.currentBuildable != null)).ToList();
 
         if(intersectingCommunities.Count == 0) {
             //no intersecting communities, create a new one
@@ -98,7 +98,7 @@ public class CommunitiesHandler : MonoBehaviour
     }
     private bool IsValidForCommunity(GridTile tile)
     {
-        return tile != null && tile.currentBuildable != null && tile.currentBuildable.buildableFocus != Stat.Materials;
+        return tile != null && tile.currentBuildable != null;
     }
     public Community GetCommunity(GridTile tile) {
         return allCommunities.FirstOrDefault(x => x.tiles.Contains(tile));

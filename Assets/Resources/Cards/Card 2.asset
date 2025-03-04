@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 2
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Build a Blacksmith Blueprint for 5 materials and 5 gold.
+  _description: Build a Blacksmith Blueprint for 5 supplies and 5 gold.
   _cardRarity: 4
   _cardType: 1
   _buildable: {fileID: 11400000, guid: 298f5784df4cc45c188b763b25695b04, type: 2}
-  _buildableMaterialCost: 5
+  _buildableSuppliesCost: 5
   _buildableGoldCost: 5
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 0
   _statFromValue: 0

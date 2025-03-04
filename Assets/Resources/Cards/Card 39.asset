@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 39
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a Hill to a Mine for 20 materials and 5 gold.
+  _description: Upgrade a Hill to a Mine for 20 supplies and 5 gold.
   _cardRarity: 3
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 7dfab4c7770864992998bf61c2eaa9be, type: 2}
-  _upgradeMaterialCost: 20
+  _upgradeSuppliesCost: 20
   _upgradeGoldCost: 5
   _statFrom: 0
   _statFromValue: 0

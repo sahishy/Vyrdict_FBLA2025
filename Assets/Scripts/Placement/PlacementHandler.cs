@@ -153,10 +153,10 @@ public class PlacementHandler : MonoBehaviour, Animatable
 
                 //-----------STATS LOGIC-----------
                 if(isUpgrade) {
-                    StatsHandler.instance.ChangeStat(Stat.Materials, -currentCard.upgradeMaterialCost);
+                    StatsHandler.instance.ChangeStat(Stat.Supplies, -currentCard.upgradeSuppliesCost);
                     StatsHandler.instance.ChangeStat(Stat.Gold, -currentCard.upgradeGoldCost);
                 } else {
-                    StatsHandler.instance.ChangeStat(Stat.Materials, -currentCard.buildableMaterialCost);
+                    StatsHandler.instance.ChangeStat(Stat.Supplies, -currentCard.buildableSuppliesCost);
                     StatsHandler.instance.ChangeStat(Stat.Gold, -currentCard.buildableGoldCost);
                 }
 

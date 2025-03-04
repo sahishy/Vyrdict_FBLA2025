@@ -10,11 +10,11 @@ public class Card : ScriptableObject
     [SerializeField] private CardType _cardType;
     //buildable card
     [SerializeField] private Buildable _buildable;
-    [SerializeField] private int _buildableMaterialCost;
+    [SerializeField] private int _buildableSuppliesCost;
     [SerializeField] private int _buildableGoldCost;
     //upgrade card
     [SerializeField] private Buildable _upgrade;
-    [SerializeField] private int _upgradeMaterialCost;
+    [SerializeField] private int _upgradeSuppliesCost;
     [SerializeField] private int _upgradeGoldCost;
     //convert card
     [SerializeField] private Stat _statFrom;
@@ -42,11 +42,11 @@ public class Card : ScriptableObject
     public CardType cardType { get => _cardType; set => _cardType = value; }
     //buildable card
     public Buildable buildable { get => _buildable; set => _buildable = value; }
-    public int buildableMaterialCost { get => _buildableMaterialCost; set => _buildableMaterialCost = value; }
+    public int buildableSuppliesCost { get => _buildableSuppliesCost; set => _buildableSuppliesCost = value; }
     public int buildableGoldCost { get => _buildableGoldCost; set => _buildableGoldCost = value; }
     //upgrade card
     public Buildable upgrade { get => _upgrade; set => _upgrade = value; }
-    public int upgradeMaterialCost { get => _upgradeMaterialCost; set => _upgradeMaterialCost = value; }
+    public int upgradeSuppliesCost { get => _upgradeSuppliesCost; set => _upgradeSuppliesCost = value; }
     public int upgradeGoldCost { get => _upgradeGoldCost; set => _upgradeGoldCost = value; }
     //convert card
     public Stat statFrom { get => _statFrom; set => _statFrom = value; }
@@ -100,7 +100,7 @@ public class CardEditor : Editor
 
         if(script.cardType == CardType.Buildable) {
             script.buildable = (Buildable)EditorGUILayout.ObjectField("Buildable", script.buildable, typeof(Buildable), false);
-            script.buildableMaterialCost = EditorGUILayout.IntField("Material Cost", script.buildableMaterialCost);
+            script.buildableSuppliesCost = EditorGUILayout.IntField("Supplies Cost", script.buildableSuppliesCost);
             script.buildableGoldCost = EditorGUILayout.IntField("Gold Cost", script.buildableGoldCost);
         }
         
@@ -108,7 +108,7 @@ public class CardEditor : Editor
 
         if(script.cardType == CardType.Upgrade) {
             script.upgrade = (Buildable)EditorGUILayout.ObjectField("Upgrade", script.upgrade, typeof(Buildable), false);
-            script.upgradeMaterialCost = EditorGUILayout.IntField("Material Cost", script.upgradeMaterialCost);
+            script.upgradeSuppliesCost = EditorGUILayout.IntField("Supplies Cost", script.upgradeSuppliesCost);
             script.upgradeGoldCost = EditorGUILayout.IntField("Gold Cost", script.upgradeGoldCost);
         }
 

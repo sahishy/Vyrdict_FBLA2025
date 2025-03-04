@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 65
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Trade 15 food for 5 materials.
+  _description: Trade 15 food for 5 supplies.
   _cardRarity: 2
   _cardType: 3
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 0}
-  _upgradeMaterialCost: 0
+  _upgradeSuppliesCost: 0
   _upgradeGoldCost: 0
   _statFrom: 2
   _statFromValue: 15

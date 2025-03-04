@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Card 27
   m_EditorClassIdentifier: 
   _icon: {fileID: 0}
-  _description: Upgrade a Tent to a House for 15 materials and 5 gold.
+  _description: Upgrade a Tent to a House for 15 supplies and 5 gold.
   _cardRarity: 2
   _cardType: 2
   _buildable: {fileID: 0}
-  _buildableMaterialCost: 0
+  _buildableSuppliesCost: 0
   _buildableGoldCost: 0
   _upgrade: {fileID: 11400000, guid: 3f9f0f416eacaa2498537aac6c0ad555, type: 2}
-  _upgradeMaterialCost: 15
+  _upgradeSuppliesCost: 15
   _upgradeGoldCost: 5
   _statFrom: 0
   _statFromValue: 0

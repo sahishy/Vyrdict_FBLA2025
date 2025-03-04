@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _icon: {fileID: 21300000, guid: 26f35e605e5ed4540af84429071707d4, type: 3}
   _description: A big mill that focuses on chopping down trees for materials.
-  _materialsEffect: 2
+  _suppliesEffect: 2
   _foodEffect: 0
   _goldEffect: 0
   _pollutable: 1

@@ -1,0 +1,64 @@
+{
+    "type": "function",
+    "function": {
+        "name": "generate_crisis",
+        "description": "Generate a critical crisis scenario that forces the player to make an urgent ethical decision.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "crisis": {
+                    "type": "string",
+                    "description": "A short, immersive description of the crisis the island is facing."
+                },
+                "choices": {
+                    "type": "object",
+                    "description": "The two choices the player can make during the crisis.",
+                    "properties": {
+                        "choice1": {
+                            "type": "object",
+                            "description": "The first choice for the player, which always affects the fate timer.",
+                            "properties": {
+                                "description": {
+                                    "type": "string",
+                                    "description": "A short description of the first choice."
+                                },
+                                "stat": {
+                                    "type": "string",
+                                    "enum": ["fate"],
+                                    "description": "The stat affected by this choice. This choice always affects the fate timer."
+                                },
+                                "effect": {
+                                    "type": "integer",
+                                    "description": "An integer representing how much the fate timer changes. It is always a negative value."
+                                }
+                            },
+                            "required": ["description", "stat", "effect"]
+                        },
+                        "choice2": {
+                            "type": "object",
+                            "description": "The second choice for the player, which affects one of the main resources (supplies, food, or gold).",
+                            "properties": {
+                                "description": {
+                                    "type": "string",
+                                    "description": "A short description of the second choice."
+                                },
+                                "stat": {
+                                    "type": "string",
+                                    "enum": ["supplies", "food", "gold"],
+                                    "description": "The stat affected by this choice. This choice always affects one of the main resources."
+                                },
+                                "effect": {
+                                    "type": "integer",
+                                    "description": "An integer representing how much the selected resource is affected. It is always a negative value."
+                                }
+                            },
+                            "required": ["description", "stat", "effect"]
+                        }
+                    },
+                    "required": ["choice1", "choice2"]
+                }
+            },
+            "required": ["crisis", "choices"]
+        }
+    }
+}
